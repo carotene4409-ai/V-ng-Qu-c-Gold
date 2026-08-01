@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Quản Trị Admin - LÀNG LÁ TQB</title>
+
+    <!-- Thư viện Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body {
+            min-height: 100vh;
+            background: #0f1016;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-card {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(22, 24, 35, 0.95);
+            border: 2px solid #2e86de;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(46, 134, 222, 0.2);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h2 { color: #2e86de; margin-bottom: 20px; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .form-group { text-align: left; margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: 1px solid #333; 
+            background: #252631; 
+            color: white; 
+            outline: none; 
+            transition: 0.2s;
+        }
+        .form-group input:focus { border-color: #2e86de; }
+
+        .admin-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 6px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-add-gold { background: #27ae60; color: white; }
+        .btn-sub-gold { background: #e67e22; color: white; }
+        .btn-reset-chat { background: #c0392b; color: white; }
+        .btn-reset-questions { background: #e67e22; color: white; }
+        .btn-danger { background: #d35400; color: white; }
+        .btn-create-code { background: #f39c12; color: white; }
+
+        /* 👇 NÚT MỚI: XÓA BXH */
+        .btn-reset-bxh { background: #8e44ad; color: white; }
+        .btn-reset-bxh:hover { background: #732d91; }
+
+        .status-box {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 13px;
+            color: #00ffae;
+        }
+
+        #adminAlertBox {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 5px 25px rgba(231, 76, 60, 0.5);
+            display: none;
+            z-index: 9999;
+            animation: slideInAlert 0.5s ease;
+            cursor: pointer;
+            max-width: 350px;
+        }
+        @keyframes slideInAlert {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        #adminAlertBox span { font-size: 18px; }
+    </style>
+</head>
+
+<body>
+
+    <div id="adminAlertBox" onclick="closeAlert()">
+        <span>🔔</span> <b id="alertContent">Có yêu cầu rút tiền mới!</b>
+    </div>
+
+    <div class="admin-card" id="loginBox">
+        <h2>🔒 ĐĂNG NHẬP ADMIN</h2>
+        <div class="form-group">
+            <label>Mật khẩu Admin</label>
+            <input type="password" id="adminPassInput" placeholder="Nhập mật khẩu admin..." onkeypress="if(event.key==='Enter') checkAdminPassword()">
+        </div>
+        <button class="admin-btn btn-add-gold" onclick="checkAdminPassword()">XÁC NHẬN</button>
+    </div>
+
+    <div class="admin-card" id="adminContent" style="display: none;">
+        <h2>⚙️ QUẢN TRỊ ADMIN</h2>
+        
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+            <h3 style="color: #ffcc00; font-size: 15px; margin-bottom: 10px; text-align: left;">💰 QUẢN LÝ GOLD NGUỜI CHƠI</h3>
+            <div class="form-group">
+                <label>Tên tài khoản người chơi</label>
+                <input type="text" id="targetUser" placeholder="Nhập tên tài khoản...">
+            </div>
+            <div class="form-group">
+                <label>Số Gold</label>
+                <input type="number" id="goldAmount" placeholder="Ví dụ: 100000000">
+            </div>
+            <button class="admin-btn btn-add-gold" onclick="addGoldToUser()">➕ CỘNG GOLD NGAY</button>
+            <button class="admin-btn btn-sub-gold" onclick="deductGoldFromUser()">➖ TRỪ GOLD NGAY</button>
+        </div>
+
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+            <h3 style="color: #ffca28; font-size: 15px; margin-bottom: 15px; text-align: left;">❓ QUẢN LÝ CÂU HỎI GAME</h3>
+            <div class="form-group">
+                <label>Nội dung câu hỏi:</label>
+                <input type="text" id="qText" placeholder="Nhập câu hỏi tại đây...">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" class="form-group">
+                <input type="text" id="qA" placeholder="Đáp án A...">
+                <input type="text" id="qB" placeholder="Đáp án B...">
+                <input type="text" id="qC" placeholder="Đáp án C...">
+                <input type="text" id="qD" placeholder="Đáp án D...">
+            </div>
+            <div class="form-group">
+                <label>Chọn Đáp án ĐÚNG:</label>
+                <select id="qCorrect">
+                    <option value="A">Đáp án A</option>
+                    <option value="B">Đáp án B</option>
+                    <option value="C">Đáp án C</option>
+                    <option value="D">Đáp án D</option>
+                </select>
+            </div>
+            <button type="button" class="admin-btn" style="background: #2196F3; color: white;" onclick="addQuestionByAdmin()">➕ THÊM CÂU HỎI LÊN SERVER</button>
+        </div>
+
+        <!-- 👇 KHU VỰC MỚI: TẠO GIFCODE -->
+        <div style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px;">
+            <h3 style="color: #ffca28; font-size: 15px; margin-bottom: 15px; text-align: left;">🎁 TẠO GIFCODE TẶNG QUÀ</h3>
+            <div class="form-group">
+                <label>Mã Giftcode (Tự đặt, VD: CHUCMUNG2024):</label>
+                <input type="text" id="giftCode" placeholder="Nhập mã code...">
+            </div>
+            <div class="form-group">
+                <label>Số Gold thưởng:</label>
+                <input type="number" id="giftGold" placeholder="Ví dụ: 50000">
+            </div>
+            <div class="form-group">
+                <label>Số lần được sử dụng (Nhập 0 để dùng vô hạn):</label>
+                <input type="number" id="giftLimit" value="1">
+            </div>
+            <button class="admin-btn btn-create-code" onclick="createGiftcode()">🎁 TẠO GIFCODE NGAY</button>
+        </div>
+
+        <div>
+            <h3 style="color: #e74c3c; font-size: 15px; margin-bottom: 10px; text-align: left;">🗑️ DỌN DẸP DỮ LIỆU</h3>
+
+            <!-- 👇 NÚT MỚI BẠN CẦN: XÓA BẢNG XẾP HẠNG -->
+            <button class="admin-btn btn-reset-bxh" onclick="resetLeaderboard()">
+                🏆 XÓA BẢNG XẾP HẠNG
+            </button>
+
+            <button class="admin-btn btn-reset-chat" onclick="resetChat()">
+                💬 XÓA TOÀN BỘ TIN NHẮN (chat.html)
+            </button>
+
+            <button class="admin-btn btn-reset-questions" onclick="resetAllQuestions()">
+                ❓ XÓA TOÀN BỘ CÂU HỎI TRÒ CHƠI
+            </button>
+            
+            <button type="button" class="admin-btn btn-danger" onclick="resetAllUsers()">
+                ⚠️ Reset Toàn Bộ Tài Khoản Game
+            </button>
+        </div>
+
+        <div class="status-box" id="statusMessage">Trạng thái: Sẵn sàng thực thi!</div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
+            authDomain: "lang-la-tqb.firebaseapp.com",
+            databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
+            projectId: "lang-la-tqb",
+            storageBucket: "lang-la-tqb.firebasestorage.app",
+            messagingSenderId: "32586764344",
+            appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const ADMIN_PASSWORD = "vqg";
+
+        function checkAdminPassword() {
+            let pass = document.getElementById("adminPassInput").value;
+            if (pass === ADMIN_PASSWORD) {
+                document.getElementById("loginBox").style.display = "none";
+                document.getElementById("adminContent").style.display = "block";
+                document.getElementById("adminPassInput").value = "";
+                listenForWithdrawRequests();
+            } else {
+                alert("❌ Mật khẩu Admin không chính xác!");
+                document.getElementById("adminPassInput").value = "";
+            }
+        }
+
+        function showStatus(msg, color = "#00ffae") {
+            const box = document.getElementById("statusMessage");
+            box.innerText = "Trạng thái: " + msg;
+            box.style.color = color;
+        }
+
+        // ===== QUẢN LÝ GOLD =====
+        function addGoldToUser() {
+            let user = document.getElementById("targetUser").value.trim();
+            let amount = parseInt(document.getElementById("goldAmount").value);
+            if (!user || isNaN(amount) || amount <= 0) return alert("⚠️ Nhập đúng Tên và Số Gold!");
+            db.ref('users/' + user).once('value').then(snapshot => {
+                if (!snapshot.exists()) return alert(`❌ Không tìm thấy tài khoản [ ${user} ]!`);
+                let newGold = (snapshot.val().gold || 0) + amount;
+                db.ref('users/' + user).update({ gold: newGold }).then(() => {
+                    showStatus(`✅ Đã cộng ${amount.toLocaleString('vi-VN')} Gold cho [ ${user} ]!`);
+                });
+            });
+        }
+
+        function deductGoldFromUser() {
+            let user = document.getElementById("targetUser").value.trim();
+            let amount = parseInt(document.getElementById("goldAmount").value);
+            if (!user || isNaN(amount) || amount <= 0) return alert("⚠️ Nhập đúng Tên và Số Gold!");
+            db.ref('users/' + user).once('value').then(snapshot => {
+                if (!snapshot.exists()) return alert(`❌ Không tìm thấy tài khoản [ ${user} ]!`);
+                let newGold = Math.max(0, (snapshot.val().gold || 0) - amount);
+                db.ref('users/' + user).update({ gold: newGold }).then(() => {
+                    showStatus(`✅ Đã trừ ${amount.toLocaleString('vi-VN')} Gold của [ ${user} ]!`);
+                });
+            });
+        }
+
+        // ===== QUẢN LÝ CÂU HỎI =====
+        function addQuestionByAdmin() {
+            const q = document.getElementById('qText').value.trim();
+            const a = document.getElementById('qA').value.trim();
+            const b = document.getElementById('qB').value.trim();
+            const c = document.getElementById('qC').value.trim();
+            const d = document.getElementById('qD').value.trim();
+            const correct = document.getElementById('qCorrect').value;
+            if (!q || !a || !b || !c || !d) return alert("⚠️ Vui lòng điền đầy đủ thông tin!");
+
+            db.ref('questions').push({ id: Date.now(), question: q, a, b, c, d, correct }).then(() => {
+                showStatus("✅ Đã lưu câu hỏi thành công!");
+                ['qText','qA','qB','qC','qD'].forEach(id => document.getElementById(id).value = '');
+            });
+        }
+
+        // ===== TẠO GIFCODE =====
+        function createGiftcode() {
+            let code = document.getElementById('giftCode').value.trim().toUpperCase();
+            let gold = parseInt(document.getElementById('giftGold').value);
+            let limit = parseInt(document.getElementById('giftLimit').value);
+
+            if (!code || code.length < 3) return alert("⚠️ Mã code phải dài ít nhất 3 ký tự!");
+            if (isNaN(gold) || gold <= 0) return alert("⚠️ Nhập số Gold tặng hợp lệ!");
+            if (isNaN(limit) || limit < 0) return alert("⚠️ Nhập số lần sử dụng (tối thiểu 0)");
+
+            db.ref('giftcodes/' + code).set({
+                gold: gold,
+                limit: limit,
+                used: 0,
+                creator: "Admin"
+            }).then(() => {
+                showStatus(`✅ Đã tạo Giftcode <b>${code}</b> thành công! Thưởng ${gold.toLocaleString('vi-VN')} Gold.`);
+                alert(`🎉 Tạo thành công Giftcode: ${code}`);
+                document.getElementById('giftCode').value = '';
+                document.getElementById('giftGold').value = '';
+                document.getElementById('giftLimit').value = '1';
+            }).catch(err => alert("❌ Lỗi khi tạo code: " + err.message));
+        }
+
+        // ===== NÚT MỚI: XÓA BẢNG XẾP HẠNG =====
+        function resetLeaderboard() {
+            if (confirm("⚠️ Bạn có chắc muốn xóa sạch Bảng Xếp Hạng trong game?")) {
+                // Xóa node 'score' của từng user trên Firebase (để game biết là chưa có điểm)
+                db.ref('users').once('value').then(snapshot => {
+                    let updates = {};
+                    snapshot.forEach(child => {
+                        updates[child.key + '/score'] = null; // Set score về null
+                    });
+                    db.ref('users').update(updates).then(() => {
+                        showStatus("✅ Đã xóa sạch Bảng Xếp Hạng trên Server!");
+                        alert("✅ Đã xóa Bảng Xếp Hạng thành công!");
+                    });
+                });
+            }
+        }
+
+        // ===== DỌN DẸP KHÁC =====
+        function resetChat() { if (confirm("Xóa Chat?")) db.ref('messages').remove().then(() => showStatus("✅ Đã xóa Chat!")); }
+        function resetAllQuestions() { if (confirm("Xóa Câu hỏi?")) db.ref('questions').remove().then(() => showStatus("✅ Đã xóa câu hỏi!")); }
+        function resetAllUsers() { 
+            const confirmText = prompt("⚠️ Nhập 'RESETALL' để xác nhận:");
+            if (confirmText !== 'RESETALL') return;
+            db.ref('users').remove().then(() => showStatus("✅ Đã xóa sạch tài khoản!"));
+        }
+
+        // ===== LẮNG NGHE THÔNG BÁO RÚT TIỀN =====
+        let alertBox = document.getElementById("adminAlertBox");
+        let alertContent = document.getElementById("alertContent");
+
+        function listenForWithdrawRequests() {
+            db.ref('admin_notifications').orderByChild('read').equalTo(false).on('child_added', (snapshot) => {
+                let data = snapshot.val();
+                if (data) {
+                    alertContent.innerHTML = `👤 ${data.user} vừa yêu cầu rút <b style="color:#ffcc00;">${data.amount} GOLD</b> (${data.quyDoi}) qua ${data.method}!`;
+                    alertBox.style.display = "block";
+                    setTimeout(() => { closeAlert(); }, 15000);
+                }
+            });
+        }
+
+        function closeAlert() {
+            alertBox.style.display = "none";
+            db.ref('admin_notifications').orderByChild('read').equalTo(false).once('value', (snapshot) => {
+                let updates = {};
+                snapshot.forEach(child => { updates[child.key + '/read'] = true; });
+                db.ref('admin_notifications').update(updates);
+            });
+        }
+    </script>
+</body>
+</html>
