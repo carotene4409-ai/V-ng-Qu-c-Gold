@@ -2,200 +2,132 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server 4 - MMORPG 2D Mini</title>
-    <!-- Firebase -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Server 4 - RPG Engine</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background: #0b0c10; color: white; font-family: 'Segoe UI', Arial, sans-serif; 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; flex-direction: column; overflow: hidden; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        body { background: #0b0c10; overflow: hidden; touch-action: none; width: 100vw; height: 100vh; }
         
-        .game-container {
-            background: #1e1e2e;
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #8e44ad;
-            position: relative;
-            width: 90%;
-            max-width: 850px; /* Giới hạn chiều rộng tối đa cho đẹp */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        #gameWrap { position: relative; width: 100%; height: 100%; background: #2c2c2c; overflow: hidden; }
+        #gameCanvas { display: block; width: 100%; height: 100%; background: #2d1b14; image-rendering: pixelated; }
+
+        /* HUD */
+        #hudBox {
+            position: absolute; top: 15px; left: 15px; z-index: 10;
+            background: #d35400; border: 3px solid #f39c12; border-radius: 12px;
+            padding: 5px 10px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.7); min-width: 140px;
         }
-        h1 { color: #9b59b6; margin-bottom: 10px; font-size: 22px; text-align: center; }
+        #hudAvatar { width: 40px; height: 40px; border-radius: 5px; background: #2d2d44; border: 2px solid #333; }
+        #hudAvatar img { width: 100%; height: 100%; object-fit: contain; }
+        #hudBars { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .bar-wrap { height: 12px; background: #2c0e0e; border-radius: 4px; position: relative; border: 1px solid #e0a800; overflow: hidden; }
+        .bar-fill { height: 100%; width: 100%; border-radius: 4px; transition: width 0.1s; }
+        .bar-hp .bar-fill { background: #ff2e2e; }
+        .bar-kp .bar-fill { background: #2e9aff; }
+        .bar-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; color: white; text-shadow: 1px 1px 0 #000; }
         
-        /* Thanh thông tin nhân vật */
-        .hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            width: 100%;
-        }
-        .hud .level { color: #2ecc71; font-weight: bold; }
-        .hud .exp { color: #f1c40f; }
-        .hud .gold { color: #ffcc00; font-weight: bold; }
-        
-        canvas { 
-            background: #2c3e50; 
-            border: 3px solid #8e44ad; 
-            border-radius: 10px; 
-            display: block; 
-            margin: 0 auto; 
-            cursor: default;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 4 / 3; /* Tỷ lệ màn hình */
-        }
+        #lvDisplay { position: absolute; top: 90px; left: 15px; background: #8e44ad; padding: 5px 12px; border-radius: 10px; border: 2px solid #9b59b6; font-weight: bold; font-size: 14px; z-index: 10; color: white; }
 
-        /* 👇 KHU VỰC NÚT ĐIỀU HƯỚNG MỚI */
-        .control-wrapper {
-            position: relative;
-            width: 100%;
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 10px;
+        /* JOYSTICK */
+        #joystickArea {
+            position: absolute; bottom: 30px; left: 30px; z-index: 10;
+            width: 130px; height: 130px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15); border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex; justify-content: center; align-items: center;
         }
+        .joy-btn {
+            position: absolute; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex; justify-content: center; align-items: center; font-size: 16px; color: white; cursor: pointer; touch-action: none;
+        }
+        .joy-up { top: 5px; left: 50%; transform: translateX(-50%); }
+        .joy-down { bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .joy-left { left: 5px; top: 50%; transform: translateY(-50%); }
+        .joy-right { right: 5px; top: 50%; transform: translateY(-50%); }
+        .joy-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.9); }
 
-        .dpad-container {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            /* Chỉnh nếu muốn nó nhỏ hơn trên PC */
+        #btnAttack {
+            position: absolute; bottom: 40px; right: 30px; z-index: 10;
+            width: 80px; height: 80px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ff9f43, #e67e22);
+            border: 4px solid #f1c40f; box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+            display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; cursor: pointer; transition: 0.1s;
         }
+        #btnAttack:active { transform: scale(0.85); background: #d35400; }
 
-        /* Các nút mũi tên */
-        .dpad-btn {
-            position: absolute;
-            width: 46px;
-            height: 46px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            user-select: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            touch-action: none; /* Ngăn cuộn trang khi chạm trên mobile */
+        /* CHỌN NHÂN VẬT */
+        #charSelectOverlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex;
+            justify-content: center; align-items: center; flex-direction: column; z-index: 999;
         }
-        
-        /* Vị trí các nút trong vòng tròn */
-        .dpad-up { top: 0; left: 50%; transform: translateX(-50%); }
-        .dpad-down { bottom: 0; left: 50%; transform: translateX(-50%); }
-        .dpad-left { left: 0; top: 50%; transform: translateY(-50%); }
-        .dpad-right { right: 0; top: 50%; transform: translateY(-50%); }
+        .select-char-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .char-card {
+            background: #1a1a2e; border: 2px solid #444; border-radius: 15px;
+            padding: 15px; width: 100px; text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .char-card:hover { border-color: #ffcc00; transform: scale(1.05); }
+        .char-card img { width: 80px; height: 100px; object-fit: contain; }
 
-        /* Hiệu ứng nhấn */
-        .dpad-btn:active, .dpad-btn.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
-        /* Hiệu ứng riêng cho left/right để không bị lệch scale */
-        .dpad-left:active, .dpad-left.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
-        .dpad-right:active, .dpad-right.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
-
-        /* Nút quay lại */
-        .btn-back {
-            background: #555; color: white; text-decoration: none;
-            padding: 10px 20px; border-radius: 5px; transition: 0.2s;
-            margin-bottom: 5px;
-        }
-        .btn-back:hover { background: #d63031; }
-
-        /* Giao diện chiến đấu */
-        #combatModal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); border-radius: 15px;
-            justify-content: center; align-items: center; flex-direction: column;
-            z-index: 100;
-        }
-        #combatModal.active { display: flex; }
-        .combat-box {
-            background: #2d3436; padding: 30px; border-radius: 20px; 
-            border: 2px solid #e74c3c; text-align: center; width: 80%; max-width: 400px;
-        }
-        .combat-box h2 { color: #e74c3c; margin-bottom: 20px; }
-        .combat-actions button {
-            background: #f39c12; border: none; padding: 10px 25px; margin: 10px;
-            border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;
-            transition: 0.2s;
-        }
-        .combat-actions button:hover { transform: scale(1.1); background: #e67e22; }
-
-        @media (max-width: 700px) {
-            .hud { flex-wrap: wrap; gap: 5px; font-size: 12px; justify-content: center; }
-            .dpad-container { width: 120px; height: 120px; }
-            .dpad-btn { width: 40px; height: 40px; font-size: 18px; }
-            .control-wrapper { justify-content: center; } /* Căn giữa nút di chuyển trên mobile */
-            .btn-back { position: absolute; top: 20px; right: 20px; }
-            h1 { font-size: 18px; }
+        @media (max-width: 600px) {
+            #joystickArea { width: 100px; height: 100px; bottom: 20px; left: 20px; }
+            .joy-btn { width: 30px; height: 30px; font-size: 12px; }
+            #btnAttack { width: 60px; height: 60px; bottom: 30px; right: 20px; font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    
-    <div class="game-container">
-        <h1>⚔️ MÁY CHỦ 4: CUỘC PHIÊU LƯU</h1>
 
-        <!-- HUD Thông tin -->
-        <div class="hud">
-            <div>👤 <b id="displayName">Loading...</b></div>
-            <div class="level">🎖️ Cấp độ: <span id="charLevel">1</span></div>
-            <div class="exp">⚡ EXP: <span id="charExp">0</span> / <span id="maxExp">100</span></div>
-            <div class="gold">💰 <span id="charGold">0</span> GOLD</div>
-        </div>
+    <div id="gameWrap">
+        <canvas id="gameCanvas"></canvas>
 
-        <!-- Khu vực Game Canvas -->
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-
-        <!-- 👇 KHU VỰC ĐIỀU KHIỂN MỚI -->
-        <div class="control-wrapper">
-            <a href="index.html" class="btn-back">⬅ Thoát Game</a>
-            
-            <!-- Nút D-Pad hình tròn -->
-            <div class="dpad-container">
-                <div class="dpad-btn dpad-up" ontouchstart="startMove('up')" ontouchend="stopMove()" onmousedown="startMove('up')" onmouseup="stopMove()">▲</div>
-                <div class="dpad-btn dpad-down" ontouchstart="startMove('down')" ontouchend="stopMove()" onmousedown="startMove('down')" onmouseup="stopMove()">▼</div>
-                <div class="dpad-btn dpad-left" ontouchstart="startMove('left')" ontouchend="stopMove()" onmousedown="startMove('left')" onmouseup="stopMove()">◀</div>
-                <div class="dpad-btn dpad-right" ontouchstart="startMove('right')" ontouchend="stopMove()" onmousedown="startMove('right')" onmouseup="stopMove()">▶</div>
-            </div>
-            
-            <div style="width: 100px;"></div> <!-- Thẻ đệm để cân bằng layout -->
-        </div>
-        
-        <!-- Hướng dẫn nhanh dưới cùng -->
-        <div style="font-size: 12px; color: #888; margin-top: 10px;">Dùng 4 nút tròn để di chuyển (Hỗ trợ cả phím WASD trên máy tính). Đến gần NPC ấn phím E.</div>
-
-        <!-- Giao diện chiến đấu -->
-        <div id="combatModal">
-            <div class="combat-box">
-                <h2>⚔️ GẶP QUÁI VẬT!</h2>
-                <p id="combatInfo">Một con quái vật xuất hiện!</p>
-                <div class="combat-actions">
-                    <button onclick="doCombat('attack')">🗡️ Tấn công</button>
-                    <button onclick="doCombat('flee')">🏃 Bỏ chạy</button>
+        <!-- 1. CHỌN NHÂN VẬT -->
+        <div id="charSelectOverlay">
+            <h3 style="color: #ffcc00; margin-bottom: 20px; font-size: 22px;">👑 CHỌN ANH HÙNG</h3>
+            <div class="select-char-grid">
+                <div class="char-card" onclick="selectCharacter('2.png')">
+                    <img src="assets/images/characters/2.png" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%22100%22%3E%3Crect fill=%22%23e74c3c%22 width=%2280%22 height=%22100%22/%3E%3Ctext x=%2225%22 y=%2255%22 fill=%22%23fff%22 font-size=%2240%22%3E⚔️%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; font-size:12px;">Chiến Binh</div>
                 </div>
-                <div id="combatResult" style="margin-top: 10px; color: #ffcc00; font-weight: bold;"></div>
+                <div class="char-card" onclick="selectCharacter('3.png')">
+                    <img src="assets/images/characters/3.png" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%22100%22%3E%3Crect fill=%22%233498db%22 width=%2280%22 height=%22100%22/%3E%3Ctext x=%2225%22 y=%2255%22 fill=%22%23fff%22 font-size=%2240%22%3E🧙%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; font-size:12px;">Pháp Sư</div>
+                </div>
+                <div class="char-card" onclick="selectCharacter('4.png')">
+                    <img src="assets/images/characters/4.png" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%22100%22%3E%3Crect fill=%22%232ecc71%22 width=%2280%22 height=%22100%22/%3E%3Ctext x=%2225%22 y=%2255%22 fill=%22%23fff%22 font-size=%2240%22%3E🗡️%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; font-size:12px;">Sát Thủ</div>
+                </div>
             </div>
         </div>
+
+        <!-- HUD -->
+        <div id="hudBox">
+            <div id="hudAvatar"><img id="avatarImg" src=""></div>
+            <div id="hudBars">
+                <div class="bar-wrap bar-hp"><div class="bar-fill" id="hpBar" style="width: 100%"></div><div class="bar-text"><span id="hpText">100/100</span></div></div>
+                <div class="bar-wrap bar-kp"><div class="bar-fill" id="kpBar" style="width: 100%"></div><div class="bar-text"><span id="kpText">100/100</span></div></div>
+            </div>
+        </div>
+        <div id="lvDisplay">🎖️ LV: <span id="lvText">1</span> (EXP: <span id="expText">0</span>)</div>
+
+        <!-- ĐIỀU KHIỂN -->
+        <div id="joystickArea">
+            <div class="joy-btn joy-up" ontouchstart="startMove('up')" ontouchend="stopMove()" onmousedown="startMove('up')" onmouseup="stopMove()">▲</div>
+            <div class="joy-btn joy-down" ontouchstart="startMove('down')" ontouchend="stopMove()" onmousedown="startMove('down')" onmouseup="stopMove()">▼</div>
+            <div class="joy-btn joy-left" ontouchstart="startMove('left')" ontouchend="stopMove()" onmousedown="startMove('left')" onmouseup="stopMove()">◀</div>
+            <div class="joy-btn joy-right" ontouchstart="startMove('right')" ontouchend="stopMove()" onmousedown="startMove('right')" onmouseup="stopMove()">▶</div>
+        </div>
+        <div id="btnAttack" ontouchstart="playerAttack()" onmousedown="playerAttack()">👊</div>
+
     </div>
 
     <script>
-        // ===== 1. CẤU HÌNH FIREBASE & USER =====
+        // ===== 1. FIREBASE & USER =====
         const firebaseConfig = {
             apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
             databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
@@ -207,191 +139,361 @@
 
         let currentUser = localStorage.getItem("currentUser");
         let users = JSON.parse(localStorage.getItem("app_users") || "{}");
-
         if (!currentUser || !users[currentUser]) {
-            alert("Vui lòng đăng nhập từ trang chủ trước khi vào game!");
-            window.location.href = "index.html";
+            alert("Vui lòng đăng nhập!"); window.location.href = "index.html";
         }
 
-        // ===== 2. DỮ LIỆU NHÂN VẬT =====
-        let playerStats = { level: 1, exp: 0, gold: users[currentUser].gold || 0 };
-        let maxExp = 100;
+        // ===== 2. GAME SETUP =====
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const WORLD_W = 3000, WORLD_H = 3000;
+        let camera = { x: 0, y: 0 };
+        let isPlaying = true;
 
-        db.ref('mmo_data/' + currentUser).once('value').then(snapshot => {
-            if (snapshot.exists()) {
-                playerStats = snapshot.val();
-            } else {
-                playerStats.gold = users[currentUser].gold || 0;
-                saveStatsToFirebase();
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // ===== 3. PLAYER =====
+        let player = {
+            x: WORLD_W/2, y: WORLD_H/2,
+            w: 50, h: 60, speed: 4,
+            hp: 100, maxHp: 100,
+            kp: 100, maxKp: 100,
+            exp: 0, level: 1, kills: 0,
+            facing: 1 // 1 là phải, -1 là trái
+        };
+        db.ref('rpg_data/' + currentUser).once('value').then(snap => {
+            if(snap.exists()) {
+                let saved = snap.val();
+                player.level = saved.level || 1;
+                player.maxHp = 100 + (player.level - 1) * 100;
+                player.maxKp = 100 + (player.level - 1) * 100;
+                player.exp = saved.exp || 0;
+                player.kills = saved.kills || 0;
             }
             updateHUD();
         });
 
-        function saveStatsToFirebase() {
-            db.ref('mmo_data/' + currentUser).set(playerStats);
-            users[currentUser].gold = playerStats.gold;
-            localStorage.setItem("app_users", JSON.stringify(users));
-            db.ref('users/' + currentUser + '/gold').set(playerStats.gold);
+        function saveGame() {
+            db.ref('rpg_data/' + currentUser).set({
+                level: player.level, exp: player.exp, kills: player.kills
+            });
         }
 
-        function updateHUD() {
-            document.getElementById("displayName").innerText = currentUser;
-            document.getElementById("charLevel").innerText = playerStats.level;
-            document.getElementById("charExp").innerText = playerStats.exp;
-            document.getElementById("maxExp").innerText = maxExp * playerStats.level;
-            document.getElementById("charGold").innerText = playerStats.gold.toLocaleString('vi-VN');
+        // ===== 4. SPRITE ANIMATION ENGINE =====
+        let currentAnim = 'idle';
+        let animTimer = 0;
+        let frameIndex = 0;
+        
+        // Đường dẫn cơ sở cho sprite sheet. 
+        // Bạn cần đặt các file ảnh vào: assets/images/characters/player/animationName_number.png
+        const basePath = "assets/images/characters/player/";
+        
+        // Cấu hình số frame và thời gian (tính bằng frame game) của từng hành động
+        const animConfig = {
+            'idle': { frames: 3, speed: 15, next: 'idle' },
+            'run':  { frames: 6, speed: 8, next: 'run' },
+            'attack': { frames: 4, speed: 6, next: 'idle' },
+            'jump': { frames: 2, speed: 12, next: 'idle' },
+            'die':  { frames: 5, speed: 10, next: 'die' }
+        };
+
+        function playAnim(name) {
+            if (currentAnim !== name) {
+                currentAnim = name;
+                frameIndex = 0;
+                animTimer = 0;
+            }
         }
 
-        // ===== 3. CANVAS =====
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const mapWidth = 800, mapHeight = 600;
+        // Hàm load ảnh động
+        function getCurrentSprite() {
+            const config = animConfig[currentAnim];
+            if (!config) return null;
+            
+            // Tạo tên file dựa trên quy tắc: (tên_anim)_(số).png
+            // Ví dụ: idle_1.png, run_2.png
+            let frameNum = (frameIndex % config.frames) + 1;
+            let img = new Image();
+            img.src = `${basePath}${currentAnim}_${frameNum}.png`;
+            
+            // Fallback: Nếu không có ảnh, dùng ảnh tĩnh 2.png
+            img.onerror = function() {
+                this.src = "assets/images/characters/2.png";
+            };
+            return img;
+        }
 
-        const playerImg = new Image();
-        playerImg.src = 'assets/images/characters/1.png';
-        const npcImg = new Image();
-        npcImg.src = 'assets/images/characters/NPC.png';
-
-        let playerX = 100, playerY = 100;
-        let isInCombat = false;
-        const npcX = 600, npcY = 400;
-
-        // Biến cho nút di chuyển giữ phím
+        // ===== 5. GAME LOOP =====
+        let keys = { up: false, down: false, left: false, right: false };
         let moveInterval = null;
+        let bullets = [];
+        let monsters = [];
+        let spawnTimer = 0;
+        let particles = [];
+        let floatingTexts = [];
 
-        function drawGame() {
-            ctx.clearRect(0, 0, mapWidth, mapHeight);
-            ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, mapWidth, mapHeight);
-            for (let i=0; i<mapWidth; i+=40) { for (let j=0; j<mapHeight; j+=40) { 
-                ctx.fillStyle = (Math.floor(i/40) + Math.floor(j/40)) % 2 === 0 ? '#4e342e' : '#2d1b14'; 
-                ctx.fillRect(i, j, 40, 40); 
-            } }
+        // Engine hiệu ứng (Giữ nguyên từ bản cũ)
+        function createExplosion(x, y, color = '#ff4400', count = 20) {
+            for(let i = 0; i < count; i++) {
+                let angle = Math.random() * Math.PI * 2;
+                let speed = 2 + Math.random() * 5;
+                particles.push({
+                    x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
+                    life: 30 + Math.random() * 30, maxLife: 30 + Math.random() * 30,
+                    size: 4 + Math.random() * 6, color: color
+                });
+            }
+        }
+        function createFloatingText(x, y, text, color = '#ffcc00') {
+            floatingTexts.push({ x: x, y: y, text: text, color: color, life: 60, vy: -2 });
+        }
 
-            // Vẽ NPC
-            if (npcImg.complete && npcImg.naturalHeight !== 0) ctx.drawImage(npcImg, npcX, npcY, 50, 70);
-            else {
-                ctx.fillStyle = '#e67e22'; ctx.fillRect(npcX, npcY, 50, 70);
-                ctx.fillStyle = 'white'; ctx.font = "12px Arial"; ctx.fillText("NPC", npcX+10, npcY-5);
+        function update() {
+            if (!isPlaying) return;
+            
+            // ===== Player Input =====
+            let dx=0, dy=0;
+            if(keys.up) dy = -player.speed;
+            if(keys.down) dy = player.speed;
+            if(keys.left) { dx = -player.speed; player.facing = -1; }
+            if(keys.right) { dx = player.speed; player.facing = 1; }
+
+            // Animation Logic
+            if (dx !== 0 || dy !== 0) {
+                playAnim('run');
+            } else {
+                playAnim('idle');
             }
 
-            // Vẽ Player
-            if (playerImg.complete && playerImg.naturalHeight !== 0) ctx.drawImage(playerImg, playerX, playerY, 50, 70);
-            else {
-                ctx.fillStyle = '#3498db'; ctx.fillRect(playerX, playerY, 50, 70);
-                ctx.fillStyle = 'white'; ctx.font = "12px Arial"; ctx.fillText("Bạn", playerX+10, playerY-5);
+            player.x = Math.max(player.w/2, Math.min(WORLD_W - player.w/2, player.x + dx));
+            player.y = Math.max(player.h/2, Math.min(WORLD_H - player.h/2, player.y + dy));
+            camera.x = player.x - canvas.width/2;
+            camera.y = player.y - canvas.height/2;
+
+            // Update Animation Frame
+            animTimer++;
+            if (animTimer >= animConfig[currentAnim].speed) {
+                animTimer = 0;
+                frameIndex++;
+                if (frameIndex >= animConfig[currentAnim].frames) {
+                    if (currentAnim === 'attack' || currentAnim === 'jump') {
+                        playAnim(animConfig[currentAnim].next); // Tự động chuyển về idle
+                    }
+                }
             }
 
-            // Chỉ dẫn ấn E
-            const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 25), 2) + Math.pow((playerY + 35) - (npcY + 35), 2));
-            if (distance < 70) {
-                ctx.fillStyle = '#ffcc00'; ctx.font = "bold 16px Arial";
-                ctx.fillText("Ấn phím E để chiến đấu", npcX - 40, npcY - 20);
+            // ===== Spawn Monster =====
+            spawnTimer++;
+            let maxMonsters = 3 + Math.floor(player.level / 3);
+            if(spawnTimer > 60 && monsters.length < maxMonsters) {
+                spawnTimer = 0;
+                let lvBonus = player.level * 10;
+                monsters.push({
+                    x: Math.random() * WORLD_W, y: Math.random() * WORLD_H,
+                    w: 30, h: 30, speed: 1.5 + player.level/5,
+                    hp: 60 + lvBonus, maxHp: 60 + lvBonus,
+                    dmg: 8 + player.level, attackCooldown: 0
+                });
+            }
+
+            // ===== Monster AI =====
+            monsters.forEach((m, idx) => {
+                let angle = Math.atan2(player.y - m.y, player.x - m.x);
+                m.x += Math.cos(angle) * m.speed;
+                m.y += Math.sin(angle) * m.speed;
+                let dist = Math.hypot(player.x - m.x, player.y - m.y);
+                if (dist < (player.w/2 + m.w/2) && m.attackCooldown <= 0) {
+                    player.hp -= m.dmg;
+                    m.attackCooldown = 40;
+                    if(player.hp <= 0) {
+                        player.hp = 0; isPlaying = false;
+                        playAnim('die');
+                        document.getElementById('btnAttack').style.pointerEvents = 'none';
+                        setTimeout(() => { window.location.href = "index.html"; }, 1500);
+                    }
+                }
+                if(m.attackCooldown > 0) m.attackCooldown--;
+            });
+
+            // ===== Bullets =====
+            bullets.forEach((b, bIdx) => {
+                b.x += b.vx; b.y += b.vy;
+                if(b.x < 0 || b.x > WORLD_W || b.y < 0 || b.y > WORLD_H) { bullets.splice(bIdx, 1); return; }
+                for(let i=0; i<monsters.length; i++) {
+                    let m = monsters[i];
+                    let dist = Math.hypot(m.x - b.x, m.y - b.y);
+                    if(dist < (m.w/2 + 10)) {
+                        m.hp -= 50;
+                        bullets.splice(bIdx, 1);
+                        if(m.hp <= 0) {
+                            createExplosion(m.x, m.y, '#ff6600', 25);
+                            createFloatingText(m.x, m.y - 20, '+'+ (100 + (player.level * 20)) +' EXP', '#2ecc71');
+                            
+                            player.exp += 100 + (player.level * 20);
+                            player.kills++;
+                            player.hp = Math.min(player.maxHp, player.hp + 30);
+                            player.kp = Math.min(player.maxKp, player.kp + 30);
+                            checkLevelUp();
+                            updateHUD();
+                            saveGame();
+                            monsters.splice(i, 1);
+                        }
+                        break;
+                    }
+                }
+            });
+
+            // ===== Regen =====
+            if(player.kp < player.maxKp) player.kp += 0.2;
+            if(player.hp < player.maxHp && player.hp > 0) player.hp += 0.2;
+            
+            // ===== Engine Update =====
+            // Update Particles
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.1;
+                p.life--; if(p.life <= 0) { particles.splice(i, 1); }
+            }
+            // Update Floating Text
+            for(let i = floatingTexts.length - 1; i >= 0; i--) {
+                let ft = floatingTexts[i]; ft.y += ft.vy; ft.life--;
+                if(ft.life <= 0) { floatingTexts.splice(i, 1); }
             }
         }
 
-        // ===== 4. CƠ CHẾ DI CHUYỂN MỚI =====
-        function performMove(direction) {
-            if (isInCombat) return;
-            const step = 20;
-            switch(direction) {
-                case 'left': if (playerX > 0) playerX -= step; break;
-                case 'right': if (playerX < mapWidth - 50) playerX += step; break;
-                case 'up': if (playerY > 0) playerY -= step; break;
-                case 'down': if (playerY < mapHeight - 70) playerY += step; break;
-            }
-            drawGame();
-        }
-
-        // Xử lý giữ nút (Nhấn & Giữ để di chuyển liên tục)
-        function startMove(direction) {
-            if (moveInterval) clearInterval(moveInterval);
-            performMove(direction); // Di chuyển ngay lần đầu
-            // Lặp lại mỗi 100ms để tạo cảm giác mượt
-            moveInterval = setInterval(() => { performMove(direction); }, 100);
-        }
-
-        function stopMove() {
-            if (moveInterval) {
-                clearInterval(moveInterval);
-                moveInterval = null;
+        function checkLevelUp() {
+            let expNeeded = 100000 * player.level;
+            while(player.exp >= expNeeded) {
+                player.exp -= expNeeded; player.level++;
+                player.maxHp += 100; player.maxKp += 100;
+                player.hp = player.maxHp; player.kp = player.maxKp;
+                expNeeded = 100000 * player.level;
+                createExplosion(player.x, player.y, '#f1c40f', 50);
+                createFloatingText(player.x, player.y - 30, '🎊 LEVEL UP!', '#9b59b6');
             }
         }
 
-        // Hỗ trợ WASD trên PC
-        document.addEventListener('keydown', function(e) {
-            if (isInCombat) return;
-            if (e.key === 'w' || e.key === 'W') { e.preventDefault(); performMove('up'); }
-            if (e.key === 's' || e.key === 'S') { e.preventDefault(); performMove('down'); }
-            if (e.key === 'a' || e.key === 'A') { e.preventDefault(); performMove('left'); }
-            if (e.key === 'd' || e.key === 'D') { e.preventDefault(); performMove('right'); }
-            if (e.key === 'e' || e.key === 'E') {
-                const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 25), 2) + Math.pow((playerY + 35) - (npcY + 35), 2));
-                if (distance < 70) openCombat();
+        // ===== 6. DRAW =====
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Vẽ nền
+            ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for(let x = -camera.x%80; x < canvas.width+80; x+=80) {
+                for(let y = -camera.y%80; y < canvas.height+80; y+=80) {
+                    ctx.fillStyle = ((Math.floor((x + camera.x)/80) + Math.floor((y + camera.y)/80)) % 2 === 0) ? '#4e342e' : '#2d1b14';
+                    ctx.fillRect(x, y, 80, 80);
+                }
             }
+
+            // Vẽ Quái
+            monsters.forEach(m => {
+                let sx = m.x - camera.x, sy = m.y - camera.y;
+                ctx.fillStyle='red'; ctx.fillRect(sx-m.w/2, sy-m.h/2-10, m.w, 4);
+                ctx.fillStyle='#2ecc71'; ctx.fillRect(sx-m.w/2, sy-m.h/2-10, m.w * (m.hp/m.maxHp), 4);
+                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(sx, sy, m.w/2, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = '14px Arial'; ctx.fillText('👹', sx-12, sy+5);
+            });
+
+            // Vẽ đạn
+            ctx.fillStyle = '#00ffcc';
+            bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x - camera.x, b.y - camera.y, 8, 0, Math.PI*2); ctx.fill(); });
+
+            // Vẽ Player (Với Sprite Animation)
+            let px = player.x - camera.x, py = player.y - camera.y;
+            let currentSprite = getCurrentSprite();
+            
+            // Lưu context để lật ảnh
+            ctx.save();
+            ctx.translate(px, py);
+            // Nếu quay sang trái (-1) thì lật ngang ảnh
+            if (player.facing === -1) {
+                ctx.scale(-1, 1);
+            }
+            
+            if (currentSprite && currentSprite.complete && currentSprite.naturalWidth > 0) {
+                ctx.drawImage(currentSprite, -player.w/2, -player.h/2, player.w, player.h);
+            } else {
+                // Fallback màu
+                ctx.fillStyle = '#00b894';
+                ctx.fillRect(-player.w/2, -player.h/2, player.w, player.h);
+            }
+            ctx.restore();
+
+            // Vẽ Particle và Text
+            particles.forEach(p => {
+                let alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x - camera.x, p.y - camera.y, p.size, 0, Math.PI * 2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            floatingTexts.forEach(ft => {
+                ctx.fillStyle = ft.color;
+                ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(ft.text, ft.x - camera.x, ft.y - camera.y);
+            });
+        }
+
+        // ===== 7. MAIN LOOP =====
+        let loopRunning = false;
+        function gameLoop() {
+            if(!loopRunning) return;
+            update(); draw(); requestAnimationFrame(gameLoop);
+        }
+        function startGameLoop() { loopRunning = true; gameLoop(); }
+
+        // ===== 8. CONTROLS =====
+        function startMove(dir) { if(moveInterval) clearInterval(moveInterval); keys[dir]=true; moveInterval = setInterval(update, 16); }
+        function stopMove() { keys.up=keys.down=keys.left=keys.right=false; if(moveInterval){clearInterval(moveInterval); moveInterval=null;} }
+
+        function playerAttack() {
+            if(player.kp < 15 || !isPlaying) return;
+            player.kp -= 15;
+            playAnim('attack'); // Kích hoạt animation đánh
+            
+            let angle = -Math.PI/2;
+            let target = null; let minDist = Infinity;
+            monsters.forEach(m => { let d = Math.hypot(player.x-m.x, player.y-m.y); if(d<minDist){minDist=d; target=m;} });
+            if(target) angle = Math.atan2(target.y - player.y, target.x - player.x);
+            bullets.push({x:player.x, y:player.y, vx:Math.cos(angle)*10, vy:Math.sin(angle)*10});
+            updateHUD();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'w'||e.key==='W') startMove('up');
+            if (e.key === 's'||e.key==='S') startMove('down');
+            if (e.key === 'a'||e.key==='A') startMove('left');
+            if (e.key === 'd'||e.key==='D') startMove('right');
+            if (e.key === ' ') { e.preventDefault(); playerAttack(); }
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'w'||e.key==='W'||e.key==='s'||e.key==='S'||e.key==='a'||e.key==='A'||e.key==='d'||e.key==='D') stopMove();
         });
 
-        // ===== 5. HỆ THỐNG CHIẾN ĐẤU =====
-        let monsterHp = 0, monsterMaxHp = 0;
-
-        function openCombat() {
-            isInCombat = true;
-            monsterMaxHp = 30 + (playerStats.level * 10);
-            monsterHp = monsterMaxHp;
-            document.getElementById('combatInfo').innerText = `👾 Quái vật xuất hiện! (HP: ${monsterHp}/${monsterMaxHp})`;
-            document.getElementById('combatResult').innerHTML = '';
-            document.getElementById('combatModal').classList.add('active');
+        // ===== 9. SELECT CHARACTER =====
+        function selectCharacter(path) {
+            // Trong trường hợp có cả bộ sprite cho từng nhân vật, ta sẽ load vào basePath
+            // Ở đây mình để basePath là thư mục player chung
+            document.getElementById('avatarImg').src = path;
+            document.getElementById('charSelectOverlay').style.display = 'none';
+            startGameLoop();
         }
 
-        function doCombat(action) {
-            if (action === 'attack') {
-                let dmg = 10 + Math.floor(Math.random() * 10) + (playerStats.level * 2);
-                monsterHp -= dmg;
-                document.getElementById('combatResult').innerHTML = `⚔️ Bạn gây <b style="color:#e74c3c;">${dmg}</b> sát thương!<br>`;
-                
-                if (monsterHp <= 0) {
-                    let expReward = 20 + (playerStats.level * 10);
-                    let goldReward = 50 + (playerStats.level * 20);
-                    playerStats.exp += expReward;
-                    playerStats.gold += goldReward;
-                    
-                    document.getElementById('combatResult').innerHTML += `🎉 Bạn đã tiêu diệt quái vật!<br>+${expReward} EXP, +${goldReward} GOLD`;
-                    document.getElementById('combatInfo').innerText = `👾 Quái vật đã bị đánh bại!`;
-                    
-                    let levelUpCheck = false;
-                    while (playerStats.exp >= (maxExp * playerStats.level)) {
-                        playerStats.exp -= (maxExp * playerStats.level);
-                        playerStats.level++;
-                        levelUpCheck = true;
-                    }
-                    if (levelUpCheck) {
-                        document.getElementById('combatResult').innerHTML += `<br>🎊 <b style="color:#2ecc71;">CHÚC MỪNG LÊN CẤP ${playerStats.level}!</b>`;
-                    }
-                    saveStatsToFirebase();
-                    updateHUD();
-                    setTimeout(closeCombat, 3000);
-                    return;
-                }
-                document.getElementById('combatInfo').innerText = `👾 HP Quái: ${monsterHp}/${monsterMaxHp}`;
-            } else if (action === 'flee') {
-                document.getElementById('combatResult').innerHTML = `🏃 Bạn đã bỏ chạy!`;
-                setTimeout(closeCombat, 1500);
-                return;
-            }
+        // ===== 10. HUD =====
+        function updateHUD() {
+            document.getElementById('hpBar').style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
+            document.getElementById('kpBar').style.width = Math.max(0, (player.kp / player.maxKp) * 100) + '%';
+            document.getElementById('hpText').innerText = `${Math.max(0, Math.floor(player.hp))}/${player.maxHp}`;
+            document.getElementById('kpText').innerText = `${Math.max(0, Math.floor(player.kp))}/${player.maxKp}`;
+            document.getElementById('lvText').innerText = player.level;
+            document.getElementById('expText').innerText = player.exp.toLocaleString('vi-VN');
         }
 
-        function closeCombat() {
-            isInCombat = false;
-            document.getElementById('combatModal').classList.remove('active');
-            drawGame();
-        }
-
-        // ===== 6. KHỞI TẠO GAME =====
-        let loadedCount = 0;
-        const checkReady = () => { loadedCount++; if(loadedCount >= 2) drawGame(); };
-        playerImg.onload = checkReady; npcImg.onload = checkReady;
-        playerImg.onerror = checkReady; npcImg.onerror = checkReady;
-        if(playerImg.complete) checkReady(); if(npcImg.complete) checkReady();
-        updateHUD();
+        resizeCanvas();
     </script>
 </body>
 </html>
