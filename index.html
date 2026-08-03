@@ -79,7 +79,7 @@
 
         .main-content {
             flex: 1;
-            max-width: 550px;
+            max-width: 600px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -119,7 +119,7 @@
 
         .btn-submit { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; }
         
-        /* 👇 BẢNG THÔNG BÁO SỰ KIỆN */
+        /* BẢNG THÔNG BÁO SỰ KIỆN */
         .event-board {
             margin-top: 15px;
             padding: 15px;
@@ -133,7 +133,7 @@
         .event-board ul li::marker { color: #ffcc00; }
         .event-board .new { color: #ffcc00; font-weight: bold; background: rgba(255,204,0,0.2); padding: 0 5px; border-radius: 4px; font-size: 10px; }
 
-        /* 👇 KHU VỰC NHẬP GIFCODE */
+        /* KHU VỰC NHẬP GIFCODE */
         .giftcode-area {
             display: flex;
             flex-direction: column;
@@ -167,6 +167,33 @@
             cursor: pointer;
         }
 
+        /* 👇 KHU VỰC MỚI: CỔNG GAME (4 MÁY CHỦ) */
+        .server-gate {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .server-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+        }
+        .server-btn:hover {
+            border-color: #ffcc00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.2);
+        }
+        .server-btn .s-icon { font-size: 28px; }
+        .server-btn .s-name { font-weight: bold; color: #ffcc00; margin-top: 5px; }
+        .server-btn .s-desc { font-size: 11px; color: #aaa; margin-top: 2px; }
+
         @media (max-width: 700px) {
             body { flex-direction: column; align-items: center; }
             .sidebar { width: 100%; min-height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; position: relative; top: 0; }
@@ -174,6 +201,7 @@
             .nav-btn { width: auto; min-height: 40px; flex-direction: row; gap: 6px; }
             .main-content { max-width: 100%; }
             .giftcode-input-group { flex-direction: column; }
+            .server-gate { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -183,8 +211,11 @@
     <div class="sidebar">
         <div class="logo-text">👑<br>VƯƠNG<br>QUỐC<br>GOLD</div>
         <a href="index.html" class="nav-btn active"><span class="icon">🏠</span><span class="label">Trang chủ</span></a>
-        <a href="chat.html" class="nav-btn"><span class="icon">💬</span><span class="label">Phòng chat</span></a>
-        <a href="game.html" class="nav-btn"><span class="icon">👑</span><span class="label">Ai là vua?</span></a>
+        <a href="game.html" class="nav-btn"><span class="icon">👑</span><span class="label">Server 1</span></a>
+        <a href="game2.html" class="nav-btn"><span class="icon">✊</span><span class="label">Server 2</span></a>
+        <a href="game3.html" class="nav-btn"><span class="icon">🎨</span><span class="label">Server 3</span></a>
+        <a href="game4.html" class="nav-btn"><span class="icon">⚔️</span><span class="label">Server 4</span></a>
+        <a href="chat.html" class="nav-btn"><span class="icon">💬</span><span class="label">Chat</span></a>
         <a href="nap.html" class="nav-btn"><span class="icon">💳</span><span class="label">Nạp tiền</span></a>
         <a href="doithuong.html" class="nav-btn"><span class="icon">🎁</span><span class="label">Đổi thưởng</span></a>
     </div>
@@ -236,7 +267,7 @@
                 </form>
             </div>
 
-            <!-- 👇 BẢNG THÔNG BÁO SỰ KIỆN (ĐÃ GHÉP VÀO LẠI) -->
+            <!-- BẢNG THÔNG BÁO SỰ KIỆN -->
             <div class="event-board">
                 <h4>📢 TIN TỨC & SỰ KIỆN MỚI NHẤT</h4>
                 <ul>
@@ -247,7 +278,7 @@
                 </ul>
             </div>
 
-            <!-- 👇 Ô NHẬP GIFCODE -->
+            <!-- Ô NHẬP GIFCODE -->
             <div class="giftcode-area">
                 <div style="font-weight: bold; color: #ffcc00;">🎁 NHẬN QUÀ TỪ GIFCODE</div>
                 <div class="giftcode-input-group">
@@ -257,11 +288,38 @@
                 <div id="giftcodeStatus" style="font-size: 13px; min-height: 20px; color: #aaa;">Nhập mã và bấm Nhận để cộng Gold</div>
             </div>
 
+            <!-- 👇 KHU VỰC CHỌN MÁY CHỦ GAME MỚI -->
+            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <h3 style="color: #ffcc00; margin-bottom: 15px;">🚀 CỔNG KẾT NỐI VÀO GAME</h3>
+                <div class="server-gate">
+                    <a href="game.html" class="server-btn">
+                        <div class="s-icon">👑</div>
+                        <div class="s-name">Máy chủ 1</div>
+                        <div class="s-desc">Ai Là Vua? (Quiz)</div>
+                    </a>
+                    <a href="game2.html" class="server-btn">
+                        <div class="s-icon">✊</div>
+                        <div class="s-name">Máy chủ 2</div>
+                        <div class="s-desc">Kéo Búa Bao (Cược Gold)</div>
+                    </a>
+                    <a href="game3.html" class="server-btn">
+                        <div class="s-icon">🎨</div>
+                        <div class="s-name">Máy chủ 3</div>
+                        <div class="s-desc">Bạn Vẽ Tôi Đoán</div>
+                    </a>
+                    <a href="game4.html" class="server-btn">
+                        <div class="s-icon">⚔️</div>
+                        <div class="s-name">Máy chủ 4</div>
+                        <div class="s-desc">MMORPG 2D (Đang xây dựng)</div>
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase
+        // Cấu hình Firebase (Giữ nguyên)
         const firebaseConfig = {
             apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
             authDomain: "lang-la-tqb.firebaseapp.com",
@@ -332,7 +390,6 @@
             }
         }
 
-        // Lắng nghe Admin cộng Gold
         function listenToGoldFromAdmin(username) {
             if (!username) return;
             db.ref('users/' + username + '/gold').on('value', (snapshot) => {

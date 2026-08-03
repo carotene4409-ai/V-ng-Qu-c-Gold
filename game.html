@@ -270,14 +270,34 @@
     <!-- ====== KHU VỰC ĐẤU TRƯỜNG ====== -->
     <div class="arena-container" id="arenaContainer">
         <button class="btn-exit-arena" onclick="exitArena()">✕ Thoát</button>
+        
+        <!-- Bảng chọn nhân vật trước khi vào trò chơi -->
+        <div id="charSelectOverlay" style="position: absolute; width: 100%; height: 100%; top:0; left:0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; flex-direction: column;">
+            <h3 style="color: #ffcc00; margin-bottom: 20px; font-size: 24px;">Chọn Nhân Vật Của Bạn</h3>
+            <div style="display: flex; gap: 20px;">
+                <div onclick="selectCharacter('assets/images/characters/2.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/2.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧝%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Chiến binh</div>
+                </div>
+                <div onclick="selectCharacter('assets/images/characters/3.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/3.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧙%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Pháp sư</div>
+                </div>
+                <div onclick="selectCharacter('assets/images/characters/4.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/4.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🗡️%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Sát thủ</div>
+                </div>
+            </div>
+        </div>
+
         <div class="arena-map" id="arenaMap">
             <div class="arena-ground"></div>
             <div class="npc" id="npcChar" onclick="talkToNPC()">
-                <img src="2.png" alt="NPC" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧙%3C/text%3E%3C/svg%3E'">
+                <img src="assets/images/characters/NPC.png" alt="NPC" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧙%3C/text%3E%3C/svg%3E'">
                 <div class="speech-bubble" id="npcBubble">Click vào ta để trò chuyện! 🧙</div>
             </div>
             <div class="player-char" id="playerChar">
-                <img src="1.png" alt="Player" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2270%22%3E%3Crect width=%2250%22 height=%2270%22 fill=%22%234caf50%22/%3E%3Ctext x=%2215%22 y=%2240%22 font-size=%2230%22%3E🦸%3C/text%3E%3C/svg%3E'">
+                <img id="playerImg" src="assets/images/characters/2.png" alt="Player" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2270%22%3E%3Crect width=%2250%22 height=%2270%22 fill=%22%234caf50%22/%3E%3Ctext x=%2215%22 y=%2240%22 font-size=%2230%22%3E🦸%3C/text%3E%3C/svg%3E'">
             </div>
         </div>
         <div class="move-controls">
@@ -370,7 +390,7 @@
                 document.getElementById("userGold").innerText = (users[currentUser].gold || 0).toLocaleString('vi-VN');
                 updateGameButton();
                 listenToGoldFromAdmin(currentUser);
-                renderGlobalLeaderboard(); // Bật chức năng xem BXH Chung
+                renderGlobalLeaderboard();
             } else {
                 document.getElementById("authBox").style.display = "block";
                 document.getElementById("userInfoBox").style.display = "none";
@@ -411,15 +431,37 @@
             } else { btn.disabled = true; btn.innerHTML = "🔒 Vui lòng đăng nhập"; }
         }
 
-        // ===== 4. LẮNG NGHE CÂU HỎI TỪ ADMIN =====
+        // ===== 4. LẮNG NGHE CÂU HỎI TỪ ADMIN & XÁO TRỘN =====
         let allQuestionsCache = [];
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let isGameComplete = false;
+
         db.ref('questions').on('value', (snapshot) => {
             let data = snapshot.val();
-            if (data) { allQuestionsCache = Object.values(data); } 
-            else { allQuestionsCache = []; }
+            if (data) { 
+                allQuestionsCache = Object.values(data);
+                // Khi tải câu hỏi mới, reset trạng thái game
+                shuffledQuestions = [];
+                currentQuestionIndex = 0;
+                isGameComplete = false;
+            } else { 
+                allQuestionsCache = []; 
+            }
         });
 
-        // ===== 5. ĐẤU TRƯỜNG =====
+        // Hàm xáo trộn mảng (Fisher-Yates)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // ===== 5. ĐẤU TRƯỜNG VÀ CHỌN NHÂN VẬT =====
         let playerX = 100, playerY = 50, isInArena = false, isAnswering = false;
         let timerInterval = null, timeLeft = 15, currentQuestion = null, isAnswered = false;
 
@@ -434,16 +476,23 @@
             saveUsers(users);
             document.getElementById("userGold").innerText = user.gold.toLocaleString('vi-VN');
             updateGameButton();
-            alert("✅ Vào đấu trường thành công! Hãy đến gặp NPC để nhận câu hỏi!");
             openArena();
         }
 
         function openArena() {
             isInArena = true;
             document.getElementById('arenaContainer').classList.add('active');
+            document.getElementById('charSelectOverlay').style.display = 'flex'; // Hiện bảng chọn nhân vật
             playerX = 100; playerY = 50;
             updatePlayerPosition();
-            document.getElementById('npcBubble').textContent = 'Click vào ta để trò chuyện! 🧙';
+            document.getElementById('npcBubble').textContent = 'Hãy chọn nhân vật của bạn trước! 🧙';
+        }
+
+        function selectCharacter(imgSrc) {
+            document.getElementById('playerImg').src = imgSrc;
+            document.getElementById('charSelectOverlay').style.display = 'none'; // Ẩn bảng chọn
+            document.getElementById('npcBubble').textContent = 'Di chuyển đến NPC và Click vào ta để trò chuyện! 🧙';
+            alert(`✅ Bạn đã chọn nhân vật thành công! Hãy dùng nút di chuyển hoặc phím WASD để đi đến NPC.`);
         }
 
         function exitArena() {
@@ -459,9 +508,14 @@
             document.getElementById('btnJoinGame').innerHTML = "👑 VÀO ĐẤU TRƯỜNG";
         }
 
+        // ===== SỬA LẠI CHỨC NĂNG DI CHUYỂN (FIX LỖI & THÊM KEYBOARD) =====
         function movePlayer(direction) {
             if (!isInArena || isAnswering) return;
-            const step = 20, mapWidth = 600, mapHeight = 400, charWidth = 50, charHeight = 70;
+            const step = 20;
+            const mapWidth = 600, mapHeight = 400;
+            const charWidth = 50, charHeight = 70;
+
+            // Giới hạn biên để nhân vật không đi ra ngoài map
             switch(direction) {
                 case 'left': playerX = Math.max(0, playerX - step); break;
                 case 'right': playerX = Math.min(mapWidth - charWidth, playerX + step); break;
@@ -471,6 +525,15 @@
             updatePlayerPosition();
             checkNearNPC();
         }
+
+        // Thêm sự kiện bàn phím (WASD)
+        document.addEventListener('keydown', function(e) {
+            if (!isInArena || isAnswering) return;
+            if (e.key === 'w' || e.key === 'W') { e.preventDefault(); movePlayer('up'); }
+            if (e.key === 's' || e.key === 'S') { e.preventDefault(); movePlayer('down'); }
+            if (e.key === 'a' || e.key === 'A') { e.preventDefault(); movePlayer('left'); }
+            if (e.key === 'd' || e.key === 'D') { e.preventDefault(); movePlayer('right'); }
+        });
 
         function updatePlayerPosition() {
             const player = document.getElementById('playerChar');
@@ -488,18 +551,56 @@
 
         function talkToNPC() {
             if (!isInArena || isAnswering) return;
+            // Kiểm tra xem đã chọn nhân vật chưa
+            if (document.getElementById('charSelectOverlay').style.display !== 'none') {
+                alert("⚠️ Hãy chọn nhân vật ở trên trước khi nói chuyện với NPC!");
+                return;
+            }
+
             const npcX = 440, npcY = 50;
             const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 30), 2) + Math.pow((playerY + 35) - (npcY + 40), 2));
             if (distance > 100) { alert("🚶 Hãy đến gần NPC hơn để trò chuyện!"); return; }
             startQuestion();
         }
 
+        // ===== 6. LOGIC CÂU HỎI & XÁO TRỘN =====
         function startQuestion() {
-            if (allQuestionsCache.length === 0) { alert("⏳ Hiện chưa có câu hỏi nào từ Admin! Vui lòng quay lại sau."); return; }
+            if (allQuestionsCache.length === 0) { 
+                alert("⏳ Hiện chưa có câu hỏi nào từ Admin! Vui lòng quay lại sau."); 
+                return; 
+            }
+
+            // Lần đầu chơi hoặc đã trả lời hết, thì xáo trộn lại
+            if (shuffledQuestions.length === 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                if (shuffledQuestions.length > 0 && currentQuestionIndex >= shuffledQuestions.length) {
+                    isGameComplete = true;
+                }
+                
+                // Kiểm tra xem có câu hỏi mới không dựa trên số lượng admin đã thêm
+                if (allQuestionsCache.length > 0) {
+                    shuffledQuestions = shuffleArray([...allQuestionsCache]);
+                    currentQuestionIndex = 0;
+                    isGameComplete = false;
+                } else {
+                    isGameComplete = true;
+                }
+            }
+
+            if (isGameComplete || shuffledQuestions.length === 0) {
+                alert("🏆 Bạn đã chinh phục hết mọi câu hỏi! Hãy đợi Admin thêm câu hỏi mới nhé!");
+                // Đá người chơi ra khỏi đấu trường khi hết câu hỏi
+                document.getElementById('questionModal').classList.remove('active');
+                isAnswering = false;
+                isInArena = false;
+                document.getElementById('arenaContainer').classList.remove('active');
+                document.getElementById('btnJoinGame').disabled = false;
+                document.getElementById('btnJoinGame').innerHTML = "👑 VÀO ĐẤU TRƯỜNG";
+                return;
+            }
 
             isAnswering = true; isAnswered = false; timeLeft = 15;
-            let randomIdx = Math.floor(Math.random() * allQuestionsCache.length);
-            currentQuestion = allQuestionsCache[randomIdx];
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            currentQuestionIndex++; // Tăng index cho câu hỏi tiếp theo
             
             document.getElementById('questionText').textContent = currentQuestion.question;
             const options = document.querySelectorAll('.q-option');
@@ -532,7 +633,7 @@
             }, 1000);
         }
 
-        // ===== HÀM QUAN TRỌNG NHẤT: CẬP NHẬT BXH TOÀN CỤC =====
+        // ===== HÀM QUAN TRỌNG: CẬP NHẬT BXH TOÀN CỤC =====
         function selectAnswer(index) {
             if (isAnswered) return;
             isAnswered = true; clearInterval(timerInterval);
@@ -601,8 +702,7 @@
             }
         }
 
-        // ===== 6. BẢNG XẾP HẠNG TOÀN CỤC (Lấy dữ liệu trực tiếp từ Firebase) =====
-        // Hàm này sẽ lắng nghe sự thay đổi điểm của *tất cả* người dùng từ Firebase
+        // ===== 7. BẢNG XẾP HẠNG TOÀN CỤC (Lấy dữ liệu trực tiếp từ Firebase) =====
         function renderGlobalLeaderboard() {
             db.ref('users').on('value', (snapshot) => {
                 let data = snapshot.val();
@@ -648,7 +748,7 @@
             });
         }
 
-        // ===== 7. KHỞI TẠO =====
+        // ===== 8. KHỞI TẠO =====
         checkAuth();
     </script>
 </body>

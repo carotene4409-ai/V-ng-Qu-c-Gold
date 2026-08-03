@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server 4 - MMORPG 2D Mini</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: #0b0c10; color: white; font-family: 'Segoe UI', Arial, sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; flex-direction: column; overflow: hidden; 
+        }
+        
+        .game-container {
+            background: #1e1e2e;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #8e44ad;
+            position: relative;
+            width: 90%;
+            max-width: 850px; /* Giới hạn chiều rộng tối đa cho đẹp */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #9b59b6; margin-bottom: 10px; font-size: 22px; text-align: center; }
+        
+        /* Thanh thông tin nhân vật */
+        .hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+        .hud .level { color: #2ecc71; font-weight: bold; }
+        .hud .exp { color: #f1c40f; }
+        .hud .gold { color: #ffcc00; font-weight: bold; }
+        
+        canvas { 
+            background: #2c3e50; 
+            border: 3px solid #8e44ad; 
+            border-radius: 10px; 
+            display: block; 
+            margin: 0 auto; 
+            cursor: default;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4 / 3; /* Tỷ lệ màn hình */
+        }
+
+        /* 👇 KHU VỰC NÚT ĐIỀU HƯỚNG MỚI */
+        .control-wrapper {
+            position: relative;
+            width: 100%;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 10px;
+        }
+
+        .dpad-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            /* Chỉnh nếu muốn nó nhỏ hơn trên PC */
+        }
+
+        /* Các nút mũi tên */
+        .dpad-btn {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            touch-action: none; /* Ngăn cuộn trang khi chạm trên mobile */
+        }
+        
+        /* Vị trí các nút trong vòng tròn */
+        .dpad-up { top: 0; left: 50%; transform: translateX(-50%); }
+        .dpad-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .dpad-left { left: 0; top: 50%; transform: translateY(-50%); }
+        .dpad-right { right: 0; top: 50%; transform: translateY(-50%); }
+
+        /* Hiệu ứng nhấn */
+        .dpad-btn:active, .dpad-btn.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
+        /* Hiệu ứng riêng cho left/right để không bị lệch scale */
+        .dpad-left:active, .dpad-left.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
+        .dpad-right:active, .dpad-right.active { background: rgba(255, 255, 255, 0.4); transform: scale(0.9); border-color: #ffcc00; }
+
+        /* Nút quay lại */
+        .btn-back {
+            background: #555; color: white; text-decoration: none;
+            padding: 10px 20px; border-radius: 5px; transition: 0.2s;
+            margin-bottom: 5px;
+        }
+        .btn-back:hover { background: #d63031; }
+
+        /* Giao diện chiến đấu */
+        #combatModal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); border-radius: 15px;
+            justify-content: center; align-items: center; flex-direction: column;
+            z-index: 100;
+        }
+        #combatModal.active { display: flex; }
+        .combat-box {
+            background: #2d3436; padding: 30px; border-radius: 20px; 
+            border: 2px solid #e74c3c; text-align: center; width: 80%; max-width: 400px;
+        }
+        .combat-box h2 { color: #e74c3c; margin-bottom: 20px; }
+        .combat-actions button {
+            background: #f39c12; border: none; padding: 10px 25px; margin: 10px;
+            border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .combat-actions button:hover { transform: scale(1.1); background: #e67e22; }
+
+        @media (max-width: 700px) {
+            .hud { flex-wrap: wrap; gap: 5px; font-size: 12px; justify-content: center; }
+            .dpad-container { width: 120px; height: 120px; }
+            .dpad-btn { width: 40px; height: 40px; font-size: 18px; }
+            .control-wrapper { justify-content: center; } /* Căn giữa nút di chuyển trên mobile */
+            .btn-back { position: absolute; top: 20px; right: 20px; }
+            h1 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="game-container">
+        <h1>⚔️ MÁY CHỦ 4: CUỘC PHIÊU LƯU</h1>
+
+        <!-- HUD Thông tin -->
+        <div class="hud">
+            <div>👤 <b id="displayName">Loading...</b></div>
+            <div class="level">🎖️ Cấp độ: <span id="charLevel">1</span></div>
+            <div class="exp">⚡ EXP: <span id="charExp">0</span> / <span id="maxExp">100</span></div>
+            <div class="gold">💰 <span id="charGold">0</span> GOLD</div>
+        </div>
+
+        <!-- Khu vực Game Canvas -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- 👇 KHU VỰC ĐIỀU KHIỂN MỚI -->
+        <div class="control-wrapper">
+            <a href="index.html" class="btn-back">⬅ Thoát Game</a>
+            
+            <!-- Nút D-Pad hình tròn -->
+            <div class="dpad-container">
+                <div class="dpad-btn dpad-up" ontouchstart="startMove('up')" ontouchend="stopMove()" onmousedown="startMove('up')" onmouseup="stopMove()">▲</div>
+                <div class="dpad-btn dpad-down" ontouchstart="startMove('down')" ontouchend="stopMove()" onmousedown="startMove('down')" onmouseup="stopMove()">▼</div>
+                <div class="dpad-btn dpad-left" ontouchstart="startMove('left')" ontouchend="stopMove()" onmousedown="startMove('left')" onmouseup="stopMove()">◀</div>
+                <div class="dpad-btn dpad-right" ontouchstart="startMove('right')" ontouchend="stopMove()" onmousedown="startMove('right')" onmouseup="stopMove()">▶</div>
+            </div>
+            
+            <div style="width: 100px;"></div> <!-- Thẻ đệm để cân bằng layout -->
+        </div>
+        
+        <!-- Hướng dẫn nhanh dưới cùng -->
+        <div style="font-size: 12px; color: #888; margin-top: 10px;">Dùng 4 nút tròn để di chuyển (Hỗ trợ cả phím WASD trên máy tính). Đến gần NPC ấn phím E.</div>
+
+        <!-- Giao diện chiến đấu -->
+        <div id="combatModal">
+            <div class="combat-box">
+                <h2>⚔️ GẶP QUÁI VẬT!</h2>
+                <p id="combatInfo">Một con quái vật xuất hiện!</p>
+                <div class="combat-actions">
+                    <button onclick="doCombat('attack')">🗡️ Tấn công</button>
+                    <button onclick="doCombat('flee')">🏃 Bỏ chạy</button>
+                </div>
+                <div id="combatResult" style="margin-top: 10px; color: #ffcc00; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 1. CẤU HÌNH FIREBASE & USER =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
+            databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
+            projectId: "lang-la-tqb",
+            appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentUser = localStorage.getItem("currentUser");
+        let users = JSON.parse(localStorage.getItem("app_users") || "{}");
+
+        if (!currentUser || !users[currentUser]) {
+            alert("Vui lòng đăng nhập từ trang chủ trước khi vào game!");
+            window.location.href = "index.html";
+        }
+
+        // ===== 2. DỮ LIỆU NHÂN VẬT =====
+        let playerStats = { level: 1, exp: 0, gold: users[currentUser].gold || 0 };
+        let maxExp = 100;
+
+        db.ref('mmo_data/' + currentUser).once('value').then(snapshot => {
+            if (snapshot.exists()) {
+                playerStats = snapshot.val();
+            } else {
+                playerStats.gold = users[currentUser].gold || 0;
+                saveStatsToFirebase();
+            }
+            updateHUD();
+        });
+
+        function saveStatsToFirebase() {
+            db.ref('mmo_data/' + currentUser).set(playerStats);
+            users[currentUser].gold = playerStats.gold;
+            localStorage.setItem("app_users", JSON.stringify(users));
+            db.ref('users/' + currentUser + '/gold').set(playerStats.gold);
+        }
+
+        function updateHUD() {
+            document.getElementById("displayName").innerText = currentUser;
+            document.getElementById("charLevel").innerText = playerStats.level;
+            document.getElementById("charExp").innerText = playerStats.exp;
+            document.getElementById("maxExp").innerText = maxExp * playerStats.level;
+            document.getElementById("charGold").innerText = playerStats.gold.toLocaleString('vi-VN');
+        }
+
+        // ===== 3. CANVAS =====
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const mapWidth = 800, mapHeight = 600;
+
+        const playerImg = new Image();
+        playerImg.src = 'assets/images/characters/1.png';
+        const npcImg = new Image();
+        npcImg.src = 'assets/images/characters/NPC.png';
+
+        let playerX = 100, playerY = 100;
+        let isInCombat = false;
+        const npcX = 600, npcY = 400;
+
+        // Biến cho nút di chuyển giữ phím
+        let moveInterval = null;
+
+        function drawGame() {
+            ctx.clearRect(0, 0, mapWidth, mapHeight);
+            ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, mapWidth, mapHeight);
+            for (let i=0; i<mapWidth; i+=40) { for (let j=0; j<mapHeight; j+=40) { 
+                ctx.fillStyle = (Math.floor(i/40) + Math.floor(j/40)) % 2 === 0 ? '#4e342e' : '#2d1b14'; 
+                ctx.fillRect(i, j, 40, 40); 
+            } }
+
+            // Vẽ NPC
+            if (npcImg.complete && npcImg.naturalHeight !== 0) ctx.drawImage(npcImg, npcX, npcY, 50, 70);
+            else {
+                ctx.fillStyle = '#e67e22'; ctx.fillRect(npcX, npcY, 50, 70);
+                ctx.fillStyle = 'white'; ctx.font = "12px Arial"; ctx.fillText("NPC", npcX+10, npcY-5);
+            }
+
+            // Vẽ Player
+            if (playerImg.complete && playerImg.naturalHeight !== 0) ctx.drawImage(playerImg, playerX, playerY, 50, 70);
+            else {
+                ctx.fillStyle = '#3498db'; ctx.fillRect(playerX, playerY, 50, 70);
+                ctx.fillStyle = 'white'; ctx.font = "12px Arial"; ctx.fillText("Bạn", playerX+10, playerY-5);
+            }
+
+            // Chỉ dẫn ấn E
+            const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 25), 2) + Math.pow((playerY + 35) - (npcY + 35), 2));
+            if (distance < 70) {
+                ctx.fillStyle = '#ffcc00'; ctx.font = "bold 16px Arial";
+                ctx.fillText("Ấn phím E để chiến đấu", npcX - 40, npcY - 20);
+            }
+        }
+
+        // ===== 4. CƠ CHẾ DI CHUYỂN MỚI =====
+        function performMove(direction) {
+            if (isInCombat) return;
+            const step = 20;
+            switch(direction) {
+                case 'left': if (playerX > 0) playerX -= step; break;
+                case 'right': if (playerX < mapWidth - 50) playerX += step; break;
+                case 'up': if (playerY > 0) playerY -= step; break;
+                case 'down': if (playerY < mapHeight - 70) playerY += step; break;
+            }
+            drawGame();
+        }
+
+        // Xử lý giữ nút (Nhấn & Giữ để di chuyển liên tục)
+        function startMove(direction) {
+            if (moveInterval) clearInterval(moveInterval);
+            performMove(direction); // Di chuyển ngay lần đầu
+            // Lặp lại mỗi 100ms để tạo cảm giác mượt
+            moveInterval = setInterval(() => { performMove(direction); }, 100);
+        }
+
+        function stopMove() {
+            if (moveInterval) {
+                clearInterval(moveInterval);
+                moveInterval = null;
+            }
+        }
+
+        // Hỗ trợ WASD trên PC
+        document.addEventListener('keydown', function(e) {
+            if (isInCombat) return;
+            if (e.key === 'w' || e.key === 'W') { e.preventDefault(); performMove('up'); }
+            if (e.key === 's' || e.key === 'S') { e.preventDefault(); performMove('down'); }
+            if (e.key === 'a' || e.key === 'A') { e.preventDefault(); performMove('left'); }
+            if (e.key === 'd' || e.key === 'D') { e.preventDefault(); performMove('right'); }
+            if (e.key === 'e' || e.key === 'E') {
+                const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 25), 2) + Math.pow((playerY + 35) - (npcY + 35), 2));
+                if (distance < 70) openCombat();
+            }
+        });
+
+        // ===== 5. HỆ THỐNG CHIẾN ĐẤU =====
+        let monsterHp = 0, monsterMaxHp = 0;
+
+        function openCombat() {
+            isInCombat = true;
+            monsterMaxHp = 30 + (playerStats.level * 10);
+            monsterHp = monsterMaxHp;
+            document.getElementById('combatInfo').innerText = `👾 Quái vật xuất hiện! (HP: ${monsterHp}/${monsterMaxHp})`;
+            document.getElementById('combatResult').innerHTML = '';
+            document.getElementById('combatModal').classList.add('active');
+        }
+
+        function doCombat(action) {
+            if (action === 'attack') {
+                let dmg = 10 + Math.floor(Math.random() * 10) + (playerStats.level * 2);
+                monsterHp -= dmg;
+                document.getElementById('combatResult').innerHTML = `⚔️ Bạn gây <b style="color:#e74c3c;">${dmg}</b> sát thương!<br>`;
+                
+                if (monsterHp <= 0) {
+                    let expReward = 20 + (playerStats.level * 10);
+                    let goldReward = 50 + (playerStats.level * 20);
+                    playerStats.exp += expReward;
+                    playerStats.gold += goldReward;
+                    
+                    document.getElementById('combatResult').innerHTML += `🎉 Bạn đã tiêu diệt quái vật!<br>+${expReward} EXP, +${goldReward} GOLD`;
+                    document.getElementById('combatInfo').innerText = `👾 Quái vật đã bị đánh bại!`;
+                    
+                    let levelUpCheck = false;
+                    while (playerStats.exp >= (maxExp * playerStats.level)) {
+                        playerStats.exp -= (maxExp * playerStats.level);
+                        playerStats.level++;
+                        levelUpCheck = true;
+                    }
+                    if (levelUpCheck) {
+                        document.getElementById('combatResult').innerHTML += `<br>🎊 <b style="color:#2ecc71;">CHÚC MỪNG LÊN CẤP ${playerStats.level}!</b>`;
+                    }
+                    saveStatsToFirebase();
+                    updateHUD();
+                    setTimeout(closeCombat, 3000);
+                    return;
+                }
+                document.getElementById('combatInfo').innerText = `👾 HP Quái: ${monsterHp}/${monsterMaxHp}`;
+            } else if (action === 'flee') {
+                document.getElementById('combatResult').innerHTML = `🏃 Bạn đã bỏ chạy!`;
+                setTimeout(closeCombat, 1500);
+                return;
+            }
+        }
+
+        function closeCombat() {
+            isInCombat = false;
+            document.getElementById('combatModal').classList.remove('active');
+            drawGame();
+        }
+
+        // ===== 6. KHỞI TẠO GAME =====
+        let loadedCount = 0;
+        const checkReady = () => { loadedCount++; if(loadedCount >= 2) drawGame(); };
+        playerImg.onload = checkReady; npcImg.onload = checkReady;
+        playerImg.onerror = checkReady; npcImg.onerror = checkReady;
+        if(playerImg.complete) checkReady(); if(npcImg.complete) checkReady();
+        updateHUD();
+    </script>
+</body>
+</html>

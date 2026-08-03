@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server 2 - Kéo Búa Bao</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        body { background: #1a1a2e; color: white; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .game-box { background: #222; max-width: 400px; margin: 0 auto; padding: 20px; border-radius: 15px; border: 2px solid gold; }
+        h1 { color: #ffcc00; }
+        .gold-box { background: #333; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
+        .choices button { font-size: 40px; padding: 15px 25px; margin: 10px; border: none; border-radius: 15px; cursor: pointer; background: #333; transition: 0.2s; }
+        .choices button:hover { transform: scale(1.1); background: #444; }
+        .result { font-size: 24px; margin: 20px 0; font-weight: bold; }
+        .win { color: #2ecc71; }
+        .lose { color: #e74c3c; }
+        .draw { color: #f1c40f; }
+        input { padding: 10px; border-radius: 5px; border: none; width: 80%; margin-bottom: 10px; }
+        .btn-bet { background: #e67e22; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .btn-back { margin-top: 20px; display: inline-block; padding: 10px 20px; background: #555; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="game-box">
+        <h1>✊ MÁY CHỦ 2: KÉO BÚA BAO</h1>
+        <div class="gold-box">💰 Số dư: <span id="userGoldDisplay">0</span> GOLD</div>
+        
+        <p style="margin-bottom: 10px;">Nhập số Gold muốn cược:</p>
+        <input type="number" id="betAmount" value="100" min="1">
+        <button class="btn-bet" onclick="playGame()">🎲 ĐẶT CƯỢC & CHƠI</button>
+
+        <div class="choices">
+            <button onclick="selectMove('👊')">👊</button>
+            <button onclick="selectMove('✋')">✋</button>
+            <button onclick="selectMove('✌️')">✌️</button>
+        </div>
+
+        <div id="resultDisplay" class="result">Chọn nước đi của bạn</div>
+
+        <a href="index.html" class="btn-back">⬅ Về Cổng Game</a>
+    </div>
+
+    <script>
+        // Cấu hình Firebase & Lấy dữ liệu
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
+            databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
+            projectId: "lang-la-tqb",
+            appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentUser = localStorage.getItem("currentUser");
+        let users = JSON.parse(localStorage.getItem("app_users") || "{}");
+        let playerMove = "";
+
+        function updateUI() {
+            if (users[currentUser]) {
+                document.getElementById("userGoldDisplay").innerText = users[currentUser].gold.toLocaleString('vi-VN');
+            }
+        }
+        updateUI();
+
+        function selectMove(move) {
+            playerMove = move;
+            document.getElementById("resultDisplay").innerHTML = "Bạn chọn: " + move + ". Hãy bấm Đặt cược & Chơi!";
+        }
+
+        function playGame() {
+            if (!playerMove) { alert("Vui lòng chọn Kéo, Búa hoặc Bao trước!"); return; }
+            let bet = parseInt(document.getElementById("betAmount").value);
+            if (isNaN(bet) || bet <= 0) { alert("Nhập số Gold cược hợp lệ!"); return; }
+            
+            let currentGold = users[currentUser].gold || 0;
+            if (currentGold < bet) { alert("Bạn không đủ Gold để cược!"); return; }
+
+            // Logic game
+            const moves = ["👊", "✋", "✌️"];
+            let botMove = moves[Math.floor(Math.random() * moves.length)];
+            let result = "";
+            let goldChange = 0;
+
+            if (playerMove === botMove) {
+                result = "Hòa!";
+                goldChange = 0;
+            } else if (
+                (playerMove === "👊" && botMove === "✌️") ||
+                (playerMove === "✋" && botMove === "👊") ||
+                (playerMove === "✌️" && botMove === "✋")
+            ) {
+                result = "Thắng!";
+                goldChange = bet * 2; // Nhân đôi tiền cược
+            } else {
+                result = "Thua!";
+                goldChange = -bet;
+            }
+
+            // Cập nhật tiền
+            users[currentUser].gold = currentGold + goldChange;
+            localStorage.setItem("app_users", JSON.stringify(users));
+            db.ref('users/' + currentUser + '/gold').set(users[currentUser].gold);
+            updateUI();
+
+            // Hiện kết quả
+            let resultDiv = document.getElementById("resultDisplay");
+            let colorClass = goldChange > 0 ? "win" : (goldChange < 0 ? "lose" : "draw");
+            resultDiv.className = `result ${colorClass}`;
+            resultDiv.innerHTML = `Máy chọn: ${botMove} <br> ${result} <br> ${goldChange > 0 ? "+" : ""}${goldChange} GOLD`;
+            
+            playerMove = ""; // Reset lựa chọn
+        }
+    </script>
+</body>
+</html>
