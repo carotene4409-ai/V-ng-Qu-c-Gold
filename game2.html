@@ -70,49 +70,74 @@
             document.getElementById("resultDisplay").innerHTML = "Bạn chọn: " + move + ". Hãy bấm Đặt cược & Chơi!";
         }
 
-        function playGame() {
-            if (!playerMove) { alert("Vui lòng chọn Kéo, Búa hoặc Bao trước!"); return; }
-            let bet = parseInt(document.getElementById("betAmount").value);
-            if (isNaN(bet) || bet <= 0) { alert("Nhập số Gold cược hợp lệ!"); return; }
-            
-            let currentGold = users[currentUser].gold || 0;
-            if (currentGold < bet) { alert("Bạn không đủ Gold để cược!"); return; }
+      function playGame() {
+    if (!playerMove) { alert("Vui lòng chọn Kéo, Búa hoặc Bao trước!"); return; }
+    let bet = parseInt(document.getElementById("betAmount").value);
+    if (isNaN(bet) || bet <= 0) { alert("Nhập số Gold cược hợp lệ!"); return; }
+    
+    let currentGold = users[currentUser].gold || 0;
+    if (currentGold < bet) { alert("Bạn không đủ Gold để cược!"); return; }
 
-            // Logic game
-            const moves = ["👊", "✋", "✌️"];
-            let botMove = moves[Math.floor(Math.random() * moves.length)];
-            let result = "";
-            let goldChange = 0;
+    // ========================================================
+    // TÙY CHỈNH TỈ LỆ TẠI ĐÂY (Tổng 3 tỉ lệ phải bằng 100)
+    // ========================================================
+    const winRate = 33;  //  Tỉ lệ Người chơi THẮNG
+    const drawRate = 33; //  Tỉ lệ HÒA
+    // 20% còn lại là Tỉ lệ THUA (100 - 60 - 20 = 20)
 
-            if (playerMove === botMove) {
-                result = "Hòa!";
-                goldChange = 0;
-            } else if (
-                (playerMove === "👊" && botMove === "✌️") ||
-                (playerMove === "✋" && botMove === "👊") ||
-                (playerMove === "✌️" && botMove === "✋")
-            ) {
-                result = "Thắng!";
-                goldChange = bet * 2; // Nhân đôi tiền cược
-            } else {
-                result = "Thua!";
-                goldChange = -bet;
-            }
+    let rand = Math.random() * 100; // Tạo số ngẫu nhiên từ 0 đến 99.99
+    let outcome = ""; // Lịch trình kết quả mong muốn
 
-            // Cập nhật tiền
-            users[currentUser].gold = currentGold + goldChange;
-            localStorage.setItem("app_users", JSON.stringify(users));
-            db.ref('users/' + currentUser + '/gold').set(users[currentUser].gold);
-            updateUI();
+    if (rand < winRate) {
+        outcome = "win";
+    } else if (rand < winRate + drawRate) {
+        outcome = "draw";
+    } else {
+        outcome = "lose";
+    }
 
-            // Hiện kết quả
-            let resultDiv = document.getElementById("resultDisplay");
-            let colorClass = goldChange > 0 ? "win" : (goldChange < 0 ? "lose" : "draw");
-            resultDiv.className = `result ${colorClass}`;
-            resultDiv.innerHTML = `Máy chọn: ${botMove} <br> ${result} <br> ${goldChange > 0 ? "+" : ""}${goldChange} GOLD`;
-            
-            playerMove = ""; // Reset lựa chọn
-        }
+    // Xác định nước đi của Bot dựa theo kết quả muốn trả ra
+    const winningMoves = { "👊": "✌️", "✋": "👊", "✌️": "✋" }; // Player đi X -> Bot đi Y thì Player thắng
+    const losingMoves  = { "👊": "✋", "✋": "✌️", "✌️": "👊" }; // Player đi X -> Bot đi Y thì Player thua
+
+    let botMove = "";
+    if (outcome === "win") {
+        botMove = winningMoves[playerMove];
+    } else if (outcome === "draw") {
+        botMove = playerMove;
+    } else {
+        botMove = losingMoves[playerMove];
+    }
+    // ========================================================
+
+    let result = "";
+    let goldChange = 0;
+
+    if (outcome === "draw") {
+        result = "Hòa!";
+        goldChange = 0;
+    } else if (outcome === "win") {
+        result = "Thắng!";
+        goldChange = bet; // Thắng nhận đúng số tiền đặt (1 ăn 1)
+    } else {
+        result = "Thua!";
+        goldChange = -bet;
+    }
+
+    // Cập nhật tiền
+    users[currentUser].gold = currentGold + goldChange;
+    localStorage.setItem("app_users", JSON.stringify(users));
+    db.ref('users/' + currentUser + '/gold').set(users[currentUser].gold);
+    updateUI();
+
+    // Hiện kết quả
+    let resultDiv = document.getElementById("resultDisplay");
+    let colorClass = goldChange > 0 ? "win" : (goldChange < 0 ? "lose" : "draw");
+    resultDiv.className = `result ${colorClass}`;
+    resultDiv.innerHTML = `Máy chọn: ${botMove} <br> ${result} <br> ${goldChange > 0 ? "+" : ""}${goldChange} GOLD`;
+    
+    playerMove = ""; // Reset lựa chọn
+}
     </script>
 </body>
 </html>

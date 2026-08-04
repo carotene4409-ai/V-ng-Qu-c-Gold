@@ -1,0 +1,99 @@
+{
+"skeleton": { "hash": "ybqAaDkZv/k", "spine": "4.1.24", "images": "./images/", "audio": "" },
+"bones": [
+	{ "name": "root" },
+	{ "name": "40_1/tanzhilang_skill_a_00", "parent": "root", "x": 7.41, "y": 6.59 }
+],
+"slots": [
+	{ "name": "40_1/tanzhilang_skill_a_00", "bone": "40_1/tanzhilang_skill_a_00" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"40_1/tanzhilang_skill_a_00": {
+				"40_1/tanzhilang_skill_a_00": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_01": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_02": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_03": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_04": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_05": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_06": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_07": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_08": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_09": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_10": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_11": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_12": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_13": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_14": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_15": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_16": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_17": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_18": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_19": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_20": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_21": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_22": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_23": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_24": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_25": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_26": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_27": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 },
+				"40_1/tanzhilang_skill_a_28": { "x": -117.73, "y": 9.88, "width": 370, "height": 291 }
+			}
+		}
+	}
+],
+"events": {
+	"impact": {}
+},
+"animations": {
+	"Nuoc_lv40": {
+		"slots": {
+			"40_1/tanzhilang_skill_a_00": {
+				"attachment": [
+					{ "name": "40_1/tanzhilang_skill_a_00" },
+					{ "time": 0.0333, "name": "40_1/tanzhilang_skill_a_02" },
+					{ "time": 0.0667, "name": "40_1/tanzhilang_skill_a_03" },
+					{ "time": 0.1, "name": "40_1/tanzhilang_skill_a_05" },
+					{ "time": 0.1333, "name": "40_1/tanzhilang_skill_a_06" },
+					{ "time": 0.1667, "name": "40_1/tanzhilang_skill_a_08" },
+					{ "time": 0.2, "name": "40_1/tanzhilang_skill_a_09" },
+					{ "time": 0.2333, "name": "40_1/tanzhilang_skill_a_11" },
+					{ "time": 0.2667, "name": "40_1/tanzhilang_skill_a_12" },
+					{ "time": 0.3, "name": "40_1/tanzhilang_skill_a_14" },
+					{ "time": 0.3333, "name": "40_1/tanzhilang_skill_a_16" },
+					{ "time": 0.3667, "name": "40_1/tanzhilang_skill_a_18" },
+					{ "time": 0.4, "name": "40_1/tanzhilang_skill_a_19" },
+					{ "time": 0.4333, "name": "40_1/tanzhilang_skill_a_21" },
+					{ "time": 0.4667, "name": "40_1/tanzhilang_skill_a_22" },
+					{ "time": 0.5, "name": "40_1/tanzhilang_skill_a_24" },
+					{ "time": 0.5333, "name": "40_1/tanzhilang_skill_a_25" },
+					{ "time": 0.5667, "name": "40_1/tanzhilang_skill_a_27" },
+					{ "time": 0.6, "name": "40_1/tanzhilang_skill_a_28" },
+					{ "time": 0.6333 }
+				]
+			}
+		},
+		"bones": {
+			"40_1/tanzhilang_skill_a_00": {
+				"translate": [
+					{ "x": 101.3, "y": 91 }
+				],
+				"scale": [
+					{ "x": 3.383, "y": 3.383 }
+				]
+			},
+			"root": {
+				"scale": [
+					{ "x": 0.988, "y": 0.988 }
+				]
+			}
+		},
+		"events": [
+			{ "time": 0.3333, "name": "impact" }
+		]
+	}
+}
+}

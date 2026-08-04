@@ -32,6 +32,7 @@
             box-shadow: 0 10px 30px rgba(46, 134, 222, 0.2);
             text-align: center;
             margin-top: 10px;
+            position: relative;
         }
 
         h2 { color: #2e86de; margin-bottom: 20px; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
@@ -82,6 +83,48 @@
             color: #00ffae;
         }
 
+        /* ==========================================
+           HỘP THƯ ADMIN (MỚI)
+           ========================================== */
+        #inboxContainer {
+            width: 100%;
+            max-width: 450px;
+            margin-top: 15px;
+            border-radius: 16px;
+            background: rgba(22, 24, 35, 0.95);
+            border: 2px solid #ffcc00;
+            padding: 15px;
+            display: none; /* Mặc định ẩn */
+        }
+        #inboxContainer h3 { color: #ffcc00; font-size: 16px; margin-bottom: 10px; text-align: left; }
+        .inbox-item {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid #ffcc00;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .inbox-item strong { color: #ffcc00; }
+        .inbox-item .meta { color: #aaa; font-size: 11px; margin-top: 5px; }
+        .inbox-item .btn-approve {
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #27ae60;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .inbox-item .btn-approve:hover { background: #219653; transform: scale(1.02); }
+
+        #noInboxMsg { color: #888; font-size: 13px; padding: 20px 0; text-align: center; }
+
         #adminAlertBox {
             position: fixed;
             top: 20px;
@@ -121,6 +164,9 @@
         <button class="admin-btn btn-add-gold" onclick="checkAdminPassword()">XÁC NHẬN</button>
     </div>
 
+    <!-- ==========================================
+         KHU VỰC QUẢN TRỊ
+         ========================================== -->
     <div class="admin-card" id="adminContent" style="display: none;">
         <h2>⚙️ QUẢN TRỊ ADMIN</h2>
         
@@ -204,6 +250,15 @@
         <div class="status-box" id="statusMessage">Trạng thái: Sẵn sàng thực thi!</div>
     </div>
 
+    <!-- ==========================================
+         HỘP THƯ YÊU CẦU RÚT TIỀN
+         ========================================== -->
+    <div id="inboxContainer">
+        <h3>📬 HỘP THƯ YÊU CẦU RÚT TIỀN</h3>
+        <div id="inboxList"></div>
+        <div id="noInboxMsg">Chưa có yêu cầu rút tiền nào đang chờ.</div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
@@ -225,8 +280,10 @@
             if (pass === ADMIN_PASSWORD) {
                 document.getElementById("loginBox").style.display = "none";
                 document.getElementById("adminContent").style.display = "block";
+                document.getElementById("inboxContainer").style.display = "block"; // Hiện hộp thư
                 document.getElementById("adminPassInput").value = "";
                 listenForWithdrawRequests();
+                loadInboxRequests(); // Tải danh sách yêu cầu đang chờ
             } else {
                 alert("❌ Mật khẩu Admin không chính xác!");
                 document.getElementById("adminPassInput").value = "";
@@ -239,34 +296,66 @@
             box.style.color = color;
         }
 
-        // ===== QUẢN LÝ GOLD =====
+        // ==========================================
+        // QUẢN LÝ GOLD (Đã sửa lỗi chuẩn hóa tên)
+        // ==========================================
         function addGoldToUser() {
-            let user = document.getElementById("targetUser").value.trim();
+            // Lấy tên từ ô input và chuẩn hóa
+            let rawUser = document.getElementById("targetUser").value.trim();
+            if (!rawUser) return alert("⚠️ Vui lòng nhập Tên tài khoản!");
+            
+            // Chuẩn hóa tên thành chữ thường và cắt khoảng trắng (để khớp với cách hệ thống đã lưu)
+            let user = rawUser.toLowerCase().trim();
+            
             let amount = parseInt(document.getElementById("goldAmount").value);
-            if (!user || isNaN(amount) || amount <= 0) return alert("⚠️ Nhập đúng Tên và Số Gold!");
+            if (isNaN(amount) || amount <= 0) return alert("⚠️ Nhập Số Gold hợp lệ!");
+
             db.ref('users/' + user).once('value').then(snapshot => {
-                if (!snapshot.exists()) return alert(`❌ Không tìm thấy tài khoản [ ${user} ]!`);
-                let newGold = (snapshot.val().gold || 0) + amount;
+                if (!snapshot.exists()) {
+                    // Báo lỗi chi tiết tên mà Admin đã gõ
+                    alert(`❌ Không tìm thấy tài khoản [ ${rawUser} ] trên hệ thống!`);
+                    return;
+                }
+                let currentGold = snapshot.val().gold || 0;
+                let newGold = currentGold + amount;
                 db.ref('users/' + user).update({ gold: newGold }).then(() => {
-                    showStatus(`✅ Đã cộng ${amount.toLocaleString('vi-VN')} Gold cho [ ${user} ]!`);
+                    showStatus(`✅ Đã cộng ${amount.toLocaleString('vi-VN')} Gold cho [ ${rawUser} ]!`);
+                    // Reset ô nhập
+                    document.getElementById("goldAmount").value = '';
+                    document.getElementById("targetUser").value = '';
                 });
             });
         }
 
         function deductGoldFromUser() {
-            let user = document.getElementById("targetUser").value.trim();
+            // Lấy tên từ ô input và chuẩn hóa
+            let rawUser = document.getElementById("targetUser").value.trim();
+            if (!rawUser) return alert("⚠️ Vui lòng nhập Tên tài khoản!");
+            
+            // Chuẩn hóa tên thành chữ thường và cắt khoảng trắng
+            let user = rawUser.toLowerCase().trim();
+            
             let amount = parseInt(document.getElementById("goldAmount").value);
-            if (!user || isNaN(amount) || amount <= 0) return alert("⚠️ Nhập đúng Tên và Số Gold!");
+            if (isNaN(amount) || amount <= 0) return alert("⚠️ Nhập Số Gold hợp lệ!");
+
             db.ref('users/' + user).once('value').then(snapshot => {
-                if (!snapshot.exists()) return alert(`❌ Không tìm thấy tài khoản [ ${user} ]!`);
-                let newGold = Math.max(0, (snapshot.val().gold || 0) - amount);
+                if (!snapshot.exists()) {
+                    alert(`❌ Không tìm thấy tài khoản [ ${rawUser} ] trên hệ thống!`);
+                    return;
+                }
+                let currentGold = snapshot.val().gold || 0;
+                let newGold = Math.max(0, currentGold - amount);
                 db.ref('users/' + user).update({ gold: newGold }).then(() => {
-                    showStatus(`✅ Đã trừ ${amount.toLocaleString('vi-VN')} Gold của [ ${user} ]!`);
+                    showStatus(`✅ Đã trừ ${amount.toLocaleString('vi-VN')} Gold của [ ${rawUser} ]!`);
+                    document.getElementById("goldAmount").value = '';
+                    document.getElementById("targetUser").value = '';
                 });
             });
         }
 
-        // ===== QUẢN LÝ CÂU HỎI =====
+        // ==========================================
+        // QUẢN LÝ CÂU HỎI
+        // ==========================================
         function addQuestionByAdmin() {
             const q = document.getElementById('qText').value.trim();
             const a = document.getElementById('qA').value.trim();
@@ -282,7 +371,9 @@
             });
         }
 
-        // ===== TẠO GIFCODE =====
+        // ==========================================
+        // TẠO GIFCODE
+        // ==========================================
         function createGiftcode() {
             let code = document.getElementById('giftCode').value.trim().toUpperCase();
             let gold = parseInt(document.getElementById('giftGold').value);
@@ -306,14 +397,15 @@
             }).catch(err => alert("❌ Lỗi khi tạo code: " + err.message));
         }
 
-        // ===== NÚT MỚI: XÓA BẢNG XẾP HẠNG =====
+        // ==========================================
+        // XÓA BẢNG XẾP HẠNG
+        // ==========================================
         function resetLeaderboard() {
             if (confirm("⚠️ Bạn có chắc muốn xóa sạch Bảng Xếp Hạng trong game?")) {
-                // Xóa node 'score' của từng user trên Firebase (để game biết là chưa có điểm)
                 db.ref('users').once('value').then(snapshot => {
                     let updates = {};
                     snapshot.forEach(child => {
-                        updates[child.key + '/score'] = null; // Set score về null
+                        updates[child.key + '/score'] = null;
                     });
                     db.ref('users').update(updates).then(() => {
                         showStatus("✅ Đã xóa sạch Bảng Xếp Hạng trên Server!");
@@ -323,7 +415,9 @@
             }
         }
 
-        // ===== DỌN DẸP KHÁC =====
+        // ==========================================
+        // DỌN DẸP KHÁC
+        // ==========================================
         function resetChat() { if (confirm("Xóa Chat?")) db.ref('messages').remove().then(() => showStatus("✅ Đã xóa Chat!")); }
         function resetAllQuestions() { if (confirm("Xóa Câu hỏi?")) db.ref('questions').remove().then(() => showStatus("✅ Đã xóa câu hỏi!")); }
         function resetAllUsers() { 
@@ -332,15 +426,73 @@
             db.ref('users').remove().then(() => showStatus("✅ Đã xóa sạch tài khoản!"));
         }
 
-        // ===== LẮNG NGHE THÔNG BÁO RÚT TIỀN =====
+        // ==========================================
+        // HỘP THƯ ADMIN (Xử lý yêu cầu rút tiền)
+        // ==========================================
+        let currentRequests = {};
+
+        function loadInboxRequests() {
+            db.ref('admin_notifications').orderByChild('read').equalTo(false).on('value', (snapshot) => {
+                const list = document.getElementById('inboxList');
+                const noMsg = document.getElementById('noInboxMsg');
+                list.innerHTML = '';
+                currentRequests = {};
+
+                if (snapshot.exists()) {
+                    noMsg.style.display = 'none';
+                    let data = snapshot.val();
+                    for (let key in data) {
+                        let req = data[key];
+                        currentRequests[key] = req;
+
+                        let div = document.createElement('div');
+                        div.className = 'inbox-item';
+                        
+                        let methodInfo = req.method === 'Ngân hàng' 
+                            ? `🏦 ${req.bankInfo || 'Đang cập nhật'}`
+                            : `📱 ${req.carrier || 'Thẻ cào'}`;
+
+                        let time = new Date(req.time).toLocaleString('vi-VN');
+
+                        div.innerHTML = `
+                            <div>
+                                <strong>👤 ${req.user}</strong> 
+                                <span style="color:#aaa; font-size:12px;">(${req.phone || 'Chưa có SĐT'})</span>
+                            </div>
+                            <div style="color:#ffcc00; font-size:15px;">
+                                💰 ${req.amount} <span style="color:#aaa; font-weight:normal;">(${req.quyDoi})</span>
+                            </div>
+                            <div>📦 Phương thức: ${methodInfo}</div>
+                            <div class="meta">🕒 ${time}</div>
+                            <button class="btn-approve" onclick="approveWithdraw('${key}')">✅ Đã duyệt & Chuyển tiền</button>
+                        `;
+                        list.appendChild(div);
+                    }
+                } else {
+                    noMsg.style.display = 'block';
+                }
+            });
+        }
+
+        function approveWithdraw(key) {
+            if (!confirm("Xác nhận đã chuyển tiền cho người chơi này?")) return;
+            db.ref('admin_notifications/' + key).update({ read: true }).then(() => {
+                showStatus(`✅ Đã duyệt yêu cầu của ${currentRequests[key].user}.`);
+            }).catch(err => alert("❌ Lỗi cập nhật: " + err.message));
+        }
+
+        // ==========================================
+        // THÔNG BÁO ĐỎ (Popup)
+        // ==========================================
         let alertBox = document.getElementById("adminAlertBox");
         let alertContent = document.getElementById("alertContent");
 
         function listenForWithdrawRequests() {
-            db.ref('admin_notifications').orderByChild('read').equalTo(false).on('child_added', (snapshot) => {
+            db.ref('admin_notifications').orderByChild('read').equalTo(false).limitToLast(1).on('child_added', (snapshot) => {
                 let data = snapshot.val();
                 if (data) {
-                    alertContent.innerHTML = `👤 ${data.user} vừa yêu cầu rút <b style="color:#ffcc00;">${data.amount} GOLD</b> (${data.quyDoi}) qua ${data.method}!`;
+                    let amountDisplay = data.amount || data.gold;
+                    alertContent.innerHTML = `👤 ${data.user} vừa yêu cầu rút <b style="color:#ffcc00;">${amountDisplay}</b> <br> (${data.quyDoi}) qua ${data.method}!`;
                     alertBox.style.display = "block";
                     setTimeout(() => { closeAlert(); }, 15000);
                 }
@@ -349,11 +501,6 @@
 
         function closeAlert() {
             alertBox.style.display = "none";
-            db.ref('admin_notifications').orderByChild('read').equalTo(false).once('value', (snapshot) => {
-                let updates = {};
-                snapshot.forEach(child => { updates[child.key + '/read'] = true; });
-                db.ref('admin_notifications').update(updates);
-            });
         }
     </script>
 </body>

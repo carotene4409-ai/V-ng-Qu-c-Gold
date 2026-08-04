@@ -1,0 +1,69 @@
+{
+"skeleton": { "hash": "4JLnwfxw3t0", "spine": "4.1.24", "images": "./images/", "audio": "" },
+"bones": [
+	{ "name": "root" },
+	{ "name": "speed/1", "parent": "root" }
+],
+"slots": [
+	{ "name": "speed/1", "bone": "speed/1" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"speed/1": {
+				"speed/1": {
+					"path": "speed/",
+					"scaleX": 1.02,
+					"scaleY": 1.02,
+					"width": 973,
+					"height": 500,
+					"sequence": { "count": 21 }
+				}
+			}
+		}
+	}
+],
+"events": {
+	"appear": {},
+	"disappear": {}
+},
+"animations": {
+	"Loi_lv20": {
+		"slots": {
+			"speed/1": {
+				"attachment": [
+					{ "name": "speed/1" },
+					{ "time": 0.7 }
+				]
+			}
+		},
+		"bones": {
+			"speed/1": {
+				"translate": [
+					{ "x": -352.98, "y": 178.9 }
+				],
+				"scale": [
+					{ "x": 3.294, "y": 3.294 }
+				]
+			}
+		},
+		"attachments": {
+			"default": {
+				"speed/1": {
+					"speed/1": {
+						"sequence": [
+							{ "mode": "once", "delay": 0.0333 },
+							{ "time": 0.7, "mode": "once" }
+						]
+					}
+				}
+			}
+		},
+		"events": [
+			{ "name": "appear" },
+			{ "time": 0.5333, "name": "disappear" }
+		]
+	}
+}
+}

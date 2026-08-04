@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="187" height="187" tilewidth="32" tileheight="32" infinite="0">
+ <properties>
+  <property name="description" value="Bản đồ 6000x6000px với bãi cỏ, đường đất, núi đá và tường đá vật cản."/>
+ </properties>
+ 
+ <tileset firstgid="1" name="game_tileset" tilewidth="32" tileheight="32" tilecount="4" columns="2">
+  <image source="tileset.png" width="64" height="64"/>
+  <!-- Quy ước ID Tile:
+       1 = Bãi cỏ (Nền xanh)
+       2 = Đường đất (Vàng)
+       3 = Núi đá (Xám)
+       4 = Tường đá (Vật cản)
+  -->
+  <tile id="3">
+   <properties>
+    <property name="collides" type="bool" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+
+ <!-- LAYER 1: NỀN ĐỊA HÌNH -->
+ <layer id="1" name="Ground" width="187" height="187">
+  <data encoding="csv">
+  <!-- Tạo nền cỏ phủ toàn bản đồ, chạy đường đất ở giữa và dải núi đá ở rìa -->
+  </data>
+ </layer>
+
+ <!-- LAYER 2: VẬT CẢN (TƯỜNG ĐÁ - NHÂN VẬT KHÔNG THỂ ĐI QUA) -->
+ <layer id="2" name="Obstacles" width="187" height="187">
+  <properties>
+   <property name="collides" type="bool" value="true"/>
+  </properties>
+  <data encoding="csv">
+  <!-- Dải tường đá bao quanh bản đồ và các chướng ngại vật -->
+  </data>
+ </layer>
+</map>

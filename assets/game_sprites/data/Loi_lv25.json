@@ -1,0 +1,104 @@
+{
+"skeleton": { "hash": "jNU3s2GBcmA", "spine": "4.1.24", "images": "./images/", "audio": "D:/Woody/Game/Diet_quy/FX/Set/Store/skill3_lighting/skill3_lighting" },
+"bones": [
+	{ "name": "root" },
+	{ "name": "bone", "parent": "root" },
+	{ "name": "fx", "parent": "bone", "scaleX": 2.3813, "scaleY": 2.3813 }
+],
+"slots": [
+	{ "name": "s_0", "bone": "fx" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"s_0": {
+				"Set_lv40/s_0": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_2": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_4": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_6": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_8": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_10": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_12": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_14": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_16": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_17": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_18": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_19": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_20": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_21": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_22": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_23": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_24": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_25": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_26": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_27": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_28": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_29": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_30": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_31": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_32": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_33": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_34": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_35": { "y": 0.21, "width": 377, "height": 297 },
+				"Set_lv40/s_36": { "y": 0.21, "width": 377, "height": 297 }
+			}
+		}
+	}
+],
+"animations": {
+	"Loi_lv25": {
+		"slots": {
+			"s_0": {
+				"attachment": [
+					{ "name": "Set_lv40/s_0" },
+					{ "time": 0.0333, "name": "Set_lv40/s_2" },
+					{ "time": 0.0667, "name": "Set_lv40/s_4" },
+					{ "time": 0.1, "name": "Set_lv40/s_6" },
+					{ "time": 0.1333, "name": "Set_lv40/s_8" },
+					{ "time": 0.1667, "name": "Set_lv40/s_10" },
+					{ "time": 0.2, "name": "Set_lv40/s_12" },
+					{ "time": 0.2333, "name": "Set_lv40/s_14" },
+					{ "time": 0.2667, "name": "Set_lv40/s_16" },
+					{ "time": 0.3, "name": "Set_lv40/s_17" },
+					{ "time": 0.3333, "name": "Set_lv40/s_18" },
+					{ "time": 0.3667, "name": "Set_lv40/s_19" },
+					{ "time": 0.4, "name": "Set_lv40/s_20" },
+					{ "time": 0.4333, "name": "Set_lv40/s_21" },
+					{ "time": 0.4667, "name": "Set_lv40/s_22" },
+					{ "time": 0.5, "name": "Set_lv40/s_23" },
+					{ "time": 0.5333, "name": "Set_lv40/s_24" },
+					{ "time": 0.5667, "name": "Set_lv40/s_25" },
+					{ "time": 0.6, "name": "Set_lv40/s_26" },
+					{ "time": 0.6333, "name": "Set_lv40/s_27" },
+					{ "time": 0.6667, "name": "Set_lv40/s_28" },
+					{ "time": 0.7, "name": "Set_lv40/s_29" },
+					{ "time": 0.7333, "name": "Set_lv40/s_30" },
+					{ "time": 0.7667, "name": "Set_lv40/s_31" },
+					{ "time": 0.8, "name": "Set_lv40/s_33" },
+					{ "time": 0.8333, "name": "Set_lv40/s_35" },
+					{ "time": 0.8667 }
+				]
+			}
+		},
+		"bones": {
+			"fx": {
+				"rotate": [
+					{ "value": -1.1 }
+				],
+				"translate": [
+					{ "x": 7.85, "y": 253.21 }
+				]
+			},
+			"bone": {
+				"translate": [
+					{ "y": -13.27 }
+				],
+				"scale": [
+					{ "x": 2.372, "y": 2.372 }
+				]
+			}
+		}
+	}
+}
+}

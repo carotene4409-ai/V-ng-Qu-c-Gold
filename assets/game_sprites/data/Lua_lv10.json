@@ -1,0 +1,371 @@
+{
+"skeleton": { "hash": "jbBoArKYjyc", "spine": "4.1.24", "images": "./images/", "audio": "D:/Woody/Game/Diet_quy/FX/Lua/v3" },
+"bones": [
+	{ "name": "root", "rotation": 0.12 },
+	{ "name": "All_1", "parent": "root" },
+	{ "name": "Slash_only/Frame_0005", "parent": "All_1" },
+	{ "name": "All_2", "parent": "root" },
+	{ "name": "Slash_only/Frame_0006", "parent": "All_2" },
+	{ "name": "All_3", "parent": "root" },
+	{ "name": "Slash_only/Frame_0007", "parent": "All_3" },
+	{ "name": "Glow2", "parent": "All_3" }
+],
+"slots": [
+	{ "name": "Slash_only/Frame_0005", "bone": "Slash_only/Frame_0005" },
+	{ "name": "Slash_only/Frame_0006", "bone": "Slash_only/Frame_0006" },
+	{ "name": "Frame_0011", "bone": "Glow2" },
+	{ "name": "Slash_only/Frame_0007", "bone": "Slash_only/Frame_0007" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"Slash_only/Frame_0005": {
+				"Slash_only/Frame_0005": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0006": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0007": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0008": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0009": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0010": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0011": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0012": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0013": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0014": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0015": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0016": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0017": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0018": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0019": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0020": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0021": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0022": { "width": 384, "height": 342 }
+			},
+			"Slash_only/Frame_0006": {
+				"Slash_only/Frame_0005": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0006": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0007": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0008": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0009": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0010": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0011": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0012": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0013": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0014": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0015": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0016": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0017": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0018": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0019": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0020": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0021": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0022": { "width": 384, "height": 342 }
+			},
+			"Slash_only/Frame_0007": {
+				"Slash_only/Frame_0005": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0006": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0007": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0008": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0009": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0010": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0011": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0012": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0013": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0014": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0015": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0016": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0017": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0018": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0019": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0020": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0021": { "width": 384, "height": 342 },
+				"Slash_only/Frame_0022": { "width": 384, "height": 342 }
+			}
+		}
+	}
+],
+"animations": {
+	"atk1": {
+		"slots": {
+			"Slash_only/Frame_0005": {
+				"attachment": [
+					{ "time": 0.2333, "name": "Slash_only/Frame_0006" },
+					{ "time": 0.2667, "name": "Slash_only/Frame_0007" },
+					{ "time": 0.3, "name": "Slash_only/Frame_0008" },
+					{ "time": 0.3333, "name": "Slash_only/Frame_0009" },
+					{ "time": 0.3667, "name": "Slash_only/Frame_0010" },
+					{ "time": 0.4, "name": "Slash_only/Frame_0011" },
+					{ "time": 0.4333, "name": "Slash_only/Frame_0012" },
+					{ "time": 0.4667, "name": "Slash_only/Frame_0013" },
+					{ "time": 0.5, "name": "Slash_only/Frame_0014" },
+					{ "time": 0.5333, "name": "Slash_only/Frame_0017" },
+					{ "time": 0.5667, "name": "Slash_only/Frame_0018" },
+					{ "time": 0.6, "name": "Slash_only/Frame_0021" },
+					{ "time": 0.6333, "name": "Slash_only/Frame_0022" },
+					{ "time": 0.6667 }
+				]
+			}
+		},
+		"bones": {
+			"Slash_only/Frame_0005": {
+				"rotate": [
+					{ "time": 0.2 },
+					{ "time": 0.2333, "value": 31.15 },
+					{ "time": 0.2667, "value": -91.26 },
+					{ "time": 0.3333, "value": -91.34 }
+				],
+				"translate": [
+					{ "time": 0.2, "y": -10.14 }
+				]
+			},
+			"All_1": {
+				"translate": [
+					{ "time": 0.2, "x": -6.76, "y": 132.53 }
+				],
+				"scale": [
+					{ "time": 0.2, "x": 2.608, "y": 1.563 }
+				],
+				"shear": [
+					{ "time": 0.2, "x": 12.74, "y": -16.59 }
+				]
+			},
+			"All_2": {
+				"translate": [
+					{ "time": 0.5, "x": -9.64, "y": 182.89 }
+				],
+				"scale": [
+					{ "time": 0.5, "x": 2.404, "y": -1.918 }
+				],
+				"shear": [
+					{ "time": 0.5, "x": 1.59, "y": 24.64 }
+				]
+			}
+		}
+	},
+	"atk2": {
+		"slots": {
+			"Frame_0011": {
+				"rgba": [
+					{ "color": "ffffffff" },
+					{ "time": 0.2667, "color": "ffe0e0ff" }
+				]
+			},
+			"Slash_only/Frame_0005": {
+				"attachment": [
+					{ "name": "Slash_only/Frame_0014" },
+					{ "time": 0.0333, "name": "Slash_only/Frame_0017" },
+					{ "time": 0.0667, "name": "Slash_only/Frame_0018" },
+					{ "time": 0.1, "name": "Slash_only/Frame_0021" },
+					{ "time": 0.1333, "name": "Slash_only/Frame_0022" },
+					{ "time": 0.1667 }
+				]
+			},
+			"Slash_only/Frame_0006": {
+				"attachment": [
+					{ "name": "Slash_only/Frame_0005" },
+					{ "time": 0.0333, "name": "Slash_only/Frame_0006" },
+					{ "time": 0.0667, "name": "Slash_only/Frame_0007" },
+					{ "time": 0.1, "name": "Slash_only/Frame_0008" },
+					{ "time": 0.1333, "name": "Slash_only/Frame_0009" },
+					{ "time": 0.1667, "name": "Slash_only/Frame_0010" },
+					{ "time": 0.2, "name": "Slash_only/Frame_0011" },
+					{ "time": 0.2333, "name": "Slash_only/Frame_0012" },
+					{ "time": 0.2667, "name": "Slash_only/Frame_0013" },
+					{ "time": 0.3, "name": "Slash_only/Frame_0014" },
+					{ "time": 0.3333, "name": "Slash_only/Frame_0017" },
+					{ "time": 0.3667, "name": "Slash_only/Frame_0018" },
+					{ "time": 0.4, "name": "Slash_only/Frame_0021" },
+					{ "time": 0.4333, "name": "Slash_only/Frame_0022" },
+					{ "time": 0.4667 }
+				]
+			}
+		},
+		"bones": {
+			"Slash_only/Frame_0005": {
+				"rotate": [
+					{ "value": -91.34 }
+				],
+				"translate": [
+					{ "y": -10.14 }
+				]
+			},
+			"All_1": {
+				"translate": [
+					{ "x": -6.76, "y": 132.53 }
+				],
+				"scale": [
+					{ "x": 2.608, "y": 1.563 }
+				],
+				"shear": [
+					{ "x": 12.74, "y": -16.59 }
+				]
+			},
+			"Slash_only/Frame_0006": {
+				"rotate": [
+					{},
+					{ "time": 0.0333, "value": 31.15 },
+					{ "time": 0.0667, "value": -91.26 },
+					{ "time": 0.1333, "value": -91.34 }
+				]
+			},
+			"All_2": {
+				"translate": [
+					{ "x": -9.64, "y": 182.89 }
+				],
+				"scale": [
+					{ "x": 2.404, "y": -1.918 }
+				],
+				"shear": [
+					{ "x": 1.59, "y": 24.64 }
+				]
+			},
+			"All_3": {
+				"rotate": [
+					{},
+					{ "time": 0.2667, "value": 195.89 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.2667, "x": 21.34, "y": 154.56 }
+				],
+				"scale": [
+					{
+						"curve": [ 0.089, 1, 0.178, -1.986, 0.089, 1, 0.178, -1.45 ]
+					},
+					{ "time": 0.2667, "x": -2.66, "y": -1.942 }
+				]
+			},
+			"Glow2": {
+				"rotate": [
+					{},
+					{ "time": 0.2667, "value": -25.62 }
+				],
+				"scale": [
+					{},
+					{ "time": 0.2667, "x": 0.897, "y": 0.897 }
+				],
+				"shear": [
+					{},
+					{ "time": 0.2667, "y": 13.15 }
+				]
+			}
+		}
+	},
+	"atk3": {
+		"slots": {
+			"Frame_0011": {
+				"rgba": [
+					{ "color": "ffe0e0ff" },
+					{ "time": 0.0667, "color": "ffd9d9ff" },
+					{ "time": 0.3, "color": "ffffff00" }
+				]
+			},
+			"Slash_only/Frame_0006": {
+				"attachment": [
+					{ "name": "Slash_only/Frame_0013" },
+					{ "time": 0.0333, "name": "Slash_only/Frame_0014" },
+					{ "time": 0.0667, "name": "Slash_only/Frame_0017" },
+					{ "time": 0.1, "name": "Slash_only/Frame_0018" },
+					{ "time": 0.1333, "name": "Slash_only/Frame_0021" },
+					{ "time": 0.1667, "name": "Slash_only/Frame_0022" },
+					{ "time": 0.2 }
+				]
+			},
+			"Slash_only/Frame_0007": {
+				"attachment": [
+					{ "name": "Slash_only/Frame_0005" },
+					{ "time": 0.0333, "name": "Slash_only/Frame_0006" },
+					{ "time": 0.0667, "name": "Slash_only/Frame_0007" },
+					{ "time": 0.1, "name": "Slash_only/Frame_0008" },
+					{ "time": 0.1333, "name": "Slash_only/Frame_0009" },
+					{ "time": 0.1667, "name": "Slash_only/Frame_0010" },
+					{ "time": 0.2, "name": "Slash_only/Frame_0011" },
+					{ "time": 0.2333, "name": "Slash_only/Frame_0012" },
+					{ "time": 0.2667, "name": "Slash_only/Frame_0013" },
+					{ "time": 0.3, "name": "Slash_only/Frame_0014" },
+					{ "time": 0.3333, "name": "Slash_only/Frame_0017" },
+					{ "time": 0.3667, "name": "Slash_only/Frame_0018" },
+					{ "time": 0.4, "name": "Slash_only/Frame_0021" },
+					{ "time": 0.4333, "name": "Slash_only/Frame_0022" },
+					{ "time": 0.4667 }
+				]
+			}
+		},
+		"bones": {
+			"Slash_only/Frame_0005": {
+				"rotate": [
+					{ "value": -91.34 }
+				],
+				"translate": [
+					{ "y": -10.14 }
+				]
+			},
+			"All_1": {
+				"translate": [
+					{ "x": -6.76, "y": 132.53 }
+				],
+				"scale": [
+					{ "x": 2.608, "y": 1.563 }
+				],
+				"shear": [
+					{ "x": 12.74, "y": -16.59 }
+				]
+			},
+			"Slash_only/Frame_0006": {
+				"rotate": [
+					{ "value": -91.34 }
+				]
+			},
+			"All_2": {
+				"translate": [
+					{ "x": -9.64, "y": 182.89 }
+				],
+				"scale": [
+					{ "x": 2.404, "y": -1.918 }
+				],
+				"shear": [
+					{ "x": 1.59, "y": 24.64 }
+				]
+			},
+			"Slash_only/Frame_0007": {
+				"rotate": [
+					{},
+					{ "time": 0.0333, "value": 31.15 },
+					{ "time": 0.0667, "value": -91.26 },
+					{ "time": 0.1333, "value": -91.34 }
+				]
+			},
+			"All_3": {
+				"rotate": [
+					{ "value": 195.89 }
+				],
+				"translate": [
+					{ "x": 21.34, "y": 154.56 }
+				],
+				"scale": [
+					{
+						"x": -2.66,
+						"y": -1.942,
+						"curve": [ 0.056, -3.08, 0.156, -3.252, 0.056, -2.249, 0.156, -2.374 ]
+					},
+					{ "time": 0.2333, "x": -3.252, "y": -2.374 }
+				]
+			},
+			"Glow2": {
+				"rotate": [
+					{ "value": -25.62 },
+					{ "time": 0.0667, "value": -32.02 },
+					{ "time": 0.2333, "value": -105.51 }
+				],
+				"scale": [
+					{ "x": 0.897, "y": 0.897 },
+					{ "time": 0.0667, "x": 0.871, "y": 0.871 }
+				],
+				"shear": [
+					{ "y": 13.15 },
+					{ "time": 0.0667, "y": 16.44 }
+				]
+			}
+		}
+	}
+}
+}

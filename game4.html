@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Server 4 - RPG Engine</title>
+    <title>Server 4 - RPG Engine Optimized</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -15,12 +15,12 @@
         #gameWrap { position: relative; width: 100%; height: 100%; background: #2c2c2c; overflow: hidden; }
         #gameCanvas { display: block; width: 100%; height: 100%; background: #2d1b14; image-rendering: pixelated; }
 
-        /* HUD */
         #hudBox {
             position: absolute; top: 15px; left: 15px; z-index: 10;
             background: #d35400; border: 3px solid #f39c12; border-radius: 12px;
             padding: 5px 10px; display: flex; align-items: center; gap: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.7); min-width: 140px;
+            pointer-events: none;
         }
         #hudAvatar { width: 40px; height: 40px; border-radius: 5px; background: #2d2d44; border: 2px solid #333; }
         #hudAvatar img { width: 100%; height: 100%; object-fit: contain; }
@@ -31,39 +31,60 @@
         .bar-kp .bar-fill { background: #2e9aff; }
         .bar-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 9px; font-weight: bold; color: white; text-shadow: 1px 1px 0 #000; }
         
-        #lvDisplay { position: absolute; top: 90px; left: 15px; background: #8e44ad; padding: 5px 12px; border-radius: 10px; border: 2px solid #9b59b6; font-weight: bold; font-size: 14px; z-index: 10; color: white; }
+        #lvDisplay {
+            position: absolute; top: 90px; left: 15px; z-index: 10;
+            background: #8e44ad; padding: 5px 12px; border-radius: 10px;
+            border: 2px solid #9b59b6; font-weight: bold; font-size: 14px; color: white;
+            pointer-events: none;
+        }
 
-        /* JOYSTICK */
-        #joystickArea {
+        /* ==========================================
+           CSS - Analog Stick (Vòng tròn di chuyển)
+           ========================================== */
+        #joystickZone {
             position: absolute; bottom: 30px; left: 30px; z-index: 10;
-            width: 130px; height: 130px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15); border: 3px solid rgba(255, 255, 255, 0.2);
+            width: 140px; height: 140px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08); border: 2px solid rgba(255, 255, 255, 0.2);
             display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px); box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            touch-action: none;
+            /* Ngăn cản sự kiện cuộn trang khi chạm vào vùng này */
+            position: absolute; bottom: 30px; left: 30px; 
         }
-        .joy-btn {
-            position: absolute; width: 40px; height: 40px; background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3);
-            display: flex; justify-content: center; align-items: center; font-size: 16px; color: white; cursor: pointer; touch-action: none;
+        #stickKnob {
+            position: absolute;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            pointer-events: none; /* Không bắt sự kiện chuột, để sự kiện từ vùng cha */
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            transition: none; /* Không transition để phản hồi ngay lập tức */
         }
-        .joy-up { top: 5px; left: 50%; transform: translateX(-50%); }
-        .joy-down { bottom: 5px; left: 50%; transform: translateX(-50%); }
-        .joy-left { left: 5px; top: 50%; transform: translateY(-50%); }
-        .joy-right { right: 5px; top: 50%; transform: translateY(-50%); }
-        .joy-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.9); }
+        #joystickZone:active #stickKnob, #joystickZone.active #stickKnob {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: #ffcc00;
+        }
 
         #btnAttack {
             position: absolute; bottom: 40px; right: 30px; z-index: 10;
             width: 80px; height: 80px; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, #ff9f43, #e67e22);
-            border: 4px solid #f1c40f; box-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
-            display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; cursor: pointer; transition: 0.1s;
+            border: 4px solid #f1c40f; box-shadow: 0 0 20px rgba(255, 165, 0, 0.4);
+            display: flex; justify-content: center; align-items: center; font-size: 28px; color: white;
+            cursor: pointer; transition: transform 0.1s;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         #btnAttack:active { transform: scale(0.85); background: #d35400; }
+        #btnAttack:focus { outline: none; }
+        #btnAttack::-moz-focus-inner { border: 0; }
 
-        /* CHỌN NHÂN VẬT */
         #charSelectOverlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: flex;
+            background: rgba(0,0,0,0.92); display: flex;
             justify-content: center; align-items: center; flex-direction: column; z-index: 999;
         }
         .select-char-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
@@ -75,18 +96,18 @@
         .char-card img { width: 80px; height: 100px; object-fit: contain; }
 
         @media (max-width: 600px) {
-            #joystickArea { width: 100px; height: 100px; bottom: 20px; left: 20px; }
-            .joy-btn { width: 30px; height: 30px; font-size: 12px; }
-            #btnAttack { width: 60px; height: 60px; bottom: 30px; right: 20px; font-size: 20px; }
+            #joystickZone { width: 120px; height: 120px; bottom: 20px; left: 20px; }
+            #stickKnob { width: 40px; height: 40px; }
+            #btnAttack { width: 70px; height: 70px; bottom: 30px; right: 20px; font-size: 22px; }
+            #hudBox { padding: 3px 6px; min-width: 100px; }
+            #hudAvatar { width: 30px; height: 30px; }
         }
     </style>
 </head>
 <body>
-
     <div id="gameWrap">
         <canvas id="gameCanvas"></canvas>
 
-        <!-- 1. CHỌN NHÂN VẬT -->
         <div id="charSelectOverlay">
             <h3 style="color: #ffcc00; margin-bottom: 20px; font-size: 22px;">👑 CHỌN ANH HÙNG</h3>
             <div class="select-char-grid">
@@ -105,7 +126,6 @@
             </div>
         </div>
 
-        <!-- HUD -->
         <div id="hudBox">
             <div id="hudAvatar"><img id="avatarImg" src=""></div>
             <div id="hudBars">
@@ -115,40 +135,41 @@
         </div>
         <div id="lvDisplay">🎖️ LV: <span id="lvText">1</span> (EXP: <span id="expText">0</span>)</div>
 
-        <!-- ĐIỀU KHIỂN -->
-        <div id="joystickArea">
-            <div class="joy-btn joy-up" ontouchstart="startMove('up')" ontouchend="stopMove()" onmousedown="startMove('up')" onmouseup="stopMove()">▲</div>
-            <div class="joy-btn joy-down" ontouchstart="startMove('down')" ontouchend="stopMove()" onmousedown="startMove('down')" onmouseup="stopMove()">▼</div>
-            <div class="joy-btn joy-left" ontouchstart="startMove('left')" ontouchend="stopMove()" onmousedown="startMove('left')" onmouseup="stopMove()">◀</div>
-            <div class="joy-btn joy-right" ontouchstart="startMove('right')" ontouchend="stopMove()" onmousedown="startMove('right')" onmouseup="stopMove()">▶</div>
+        <!-- Analog Stick -->
+        <div id="joystickZone" onmousedown="startStick(event)" onmousemove="moveStick(event)" onmouseup="stopStick()" onmouseleave="stopStick()" ontouchstart="startStick(event)" ontouchmove="moveStick(event)" ontouchend="stopStick()" ontouchcancel="stopStick()">
+            <div id="stickKnob"></div>
         </div>
-        <div id="btnAttack" ontouchstart="playerAttack()" onmousedown="playerAttack()">👊</div>
-
+        
+        <div id="btnAttack" onmousedown="playerAttack()" ontouchstart="playerAttack()">👊</div>
     </div>
 
     <script>
-        // ===== 1. FIREBASE & USER =====
         const firebaseConfig = {
             apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
             databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
             projectId: "lang-la-tqb",
             appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
         let currentUser = localStorage.getItem("currentUser");
         let users = JSON.parse(localStorage.getItem("app_users") || "{}");
         if (!currentUser || !users[currentUser]) {
-            alert("Vui lòng đăng nhập!"); window.location.href = "index.html";
+            alert("Vui lòng đăng nhập!");
+            window.location.href = "index.html";
         }
 
-        // ===== 2. GAME SETUP =====
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const WORLD_W = 3000, WORLD_H = 3000;
+        const TILE_SIZE = 32;
+        const MAP_COLS = 80;
+        const MAP_ROWS = 80;
+        const WORLD_WIDTH = MAP_COLS * TILE_SIZE;
+        const WORLD_HEIGHT = MAP_ROWS * TILE_SIZE;
         let camera = { x: 0, y: 0 };
-        let isPlaying = true;
+        let isGameActive = false;
+        let isCharacterSelected = false;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -157,343 +178,576 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // ===== 3. PLAYER =====
-        let player = {
-            x: WORLD_W/2, y: WORLD_H/2,
-            w: 50, h: 60, speed: 4,
-            hp: 100, maxHp: 100,
-            kp: 100, maxKp: 100,
-            exp: 0, level: 1, kills: 0,
-            facing: 1 // 1 là phải, -1 là trái
-        };
-        db.ref('rpg_data/' + currentUser).once('value').then(snap => {
-            if(snap.exists()) {
-                let saved = snap.val();
-                player.level = saved.level || 1;
-                player.maxHp = 100 + (player.level - 1) * 100;
-                player.maxKp = 100 + (player.level - 1) * 100;
-                player.exp = saved.exp || 0;
-                player.kills = saved.kills || 0;
+        let tileMap = [];
+        function generateWorld() {
+            for (let r = 0; r < MAP_ROWS; r++) {
+                tileMap[r] = [];
+                for (let c = 0; c < MAP_COLS; c++) {
+                    let randomVal = Math.random();
+                    if (randomVal < 0.03) { tileMap[r][c] = 2; } 
+                    else if (randomVal < 0.08) { tileMap[r][c] = 1; } 
+                    else { tileMap[r][c] = 0; }
+                }
             }
-            updateHUD();
-        });
+            for (let r = 35; r < 45; r++) {
+                for (let c = 35; c < 45; c++) {
+                    tileMap[r][c] = 0;
+                }
+            }
+        }
+        generateWorld();
 
-        function saveGame() {
+        function renderWorld() {
+            let startCol = Math.floor(camera.x / TILE_SIZE);
+            let endCol = startCol + Math.ceil(canvas.width / TILE_SIZE) + 2;
+            let startRow = Math.floor(camera.y / TILE_SIZE);
+            let endRow = startRow + Math.ceil(canvas.height / TILE_SIZE) + 2;
+
+            startCol = Math.max(0, startCol);
+            endCol = Math.min(MAP_COLS, endCol);
+            startRow = Math.max(0, startRow);
+            endRow = Math.min(MAP_ROWS, endRow);
+
+            for (let row = startRow; row < endRow; row++) {
+                for (let col = startCol; col < endCol; col++) {
+                    let tileType = tileMap[row][col];
+                    let x = col * TILE_SIZE - camera.x;
+                    let y = row * TILE_SIZE - camera.y;
+
+                    if (tileType === 0) ctx.fillStyle = '#4caf50';
+                    else if (tileType === 1) ctx.fillStyle = '#d4a373';
+                    else if (tileType === 2) ctx.fillStyle = '#546e7a';
+                    else ctx.fillStyle = '#000';
+
+                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+            }
+        }
+
+        function checkCollision(nextX, nextY, entityWidth, entityHeight) {
+            if (nextX < 0 || nextX > WORLD_WIDTH - entityWidth) return true;
+            if (nextY < 0 || nextY > WORLD_HEIGHT - entityHeight) return true;
+
+            let centerX = nextX + entityWidth / 2;
+            let centerY = nextY + entityHeight / 2;
+            let col = Math.floor(centerX / TILE_SIZE);
+            let row = Math.floor(centerY / TILE_SIZE);
+
+            if (col < 0 || col >= MAP_COLS || row < 0 || row >= MAP_ROWS) return true;
+            return tileMap[row][col] === 2;
+        }
+
+        const player = {
+            x: 40 * TILE_SIZE, y: 40 * TILE_SIZE,
+            width: 64, height: 80, speed: 4,
+            hp: 100, maxHp: 100, kp: 100, maxKp: 100,
+            exp: 0, level: 1, kills: 0, facing: 1
+        };
+
+        function loadPlayerData() {
+            db.ref('rpg_data/' + currentUser).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    let savedData = snapshot.val();
+                    player.level = savedData.level || 1;
+                    player.maxHp = 100 + (player.level - 1) * 100;
+                    player.maxKp = 100 + (player.level - 1) * 100;
+                    player.hp = player.maxHp;
+                    player.kp = player.maxKp;
+                    player.exp = savedData.exp || 0;
+                    player.kills = savedData.kills || 0;
+                } else {
+                    savePlayerData();
+                }
+                updateHUD();
+            });
+        }
+
+        function savePlayerData() {
             db.ref('rpg_data/' + currentUser).set({
                 level: player.level, exp: player.exp, kills: player.kills
             });
         }
+        loadPlayerData();
 
-        // ===== 4. SPRITE ANIMATION ENGINE =====
-        let currentAnim = 'idle';
-        let animTimer = 0;
-        let frameIndex = 0;
-        
-        // Đường dẫn cơ sở cho sprite sheet. 
-        // Bạn cần đặt các file ảnh vào: assets/images/characters/player/animationName_number.png
-        const basePath = "assets/images/characters/player/";
-        
-        // Cấu hình số frame và thời gian (tính bằng frame game) của từng hành động
-        const animConfig = {
-            'idle': { frames: 3, speed: 15, next: 'idle' },
-            'run':  { frames: 6, speed: 8, next: 'run' },
-            'attack': { frames: 4, speed: 6, next: 'idle' },
-            'jump': { frames: 2, speed: 12, next: 'idle' },
-            'die':  { frames: 5, speed: 10, next: 'die' }
+        const ANIM_BASE_PATH = "assets/images/characters/player/";
+        let currentAnimation = 'idle';
+        let animationFrameCounter = 0;
+        let currentFrameIndex = 0;
+
+        const ANIMATION_CONFIG = {
+            'idle':   { totalFrames: 3, frameDelay: 15, nextState: 'idle' },
+            'run':    { totalFrames: 6, frameDelay: 8,  nextState: 'run' },
+            'attack': { totalFrames: 3, frameDelay: 6,  nextState: 'idle' },
+            'die':    { totalFrames: 3, frameDelay: 10, nextState: 'die' }
         };
 
-        function playAnim(name) {
-            if (currentAnim !== name) {
-                currentAnim = name;
-                frameIndex = 0;
-                animTimer = 0;
+        function setAnimation(animName) {
+            if (currentAnimation !== animName) {
+                currentAnimation = animName;
+                currentFrameIndex = 0;
+                animationFrameCounter = 0;
             }
         }
 
-        // Hàm load ảnh động
         function getCurrentSprite() {
-            const config = animConfig[currentAnim];
+            let config = ANIMATION_CONFIG[currentAnimation];
             if (!config) return null;
-            
-            // Tạo tên file dựa trên quy tắc: (tên_anim)_(số).png
-            // Ví dụ: idle_1.png, run_2.png
-            let frameNum = (frameIndex % config.frames) + 1;
+            let frameNumber = (currentFrameIndex % config.totalFrames) + 1;
             let img = new Image();
-            img.src = `${basePath}${currentAnim}_${frameNum}.png`;
-            
-            // Fallback: Nếu không có ảnh, dùng ảnh tĩnh 2.png
+            img.src = `${ANIM_BASE_PATH}${currentAnimation}_${frameNumber}.png`;
             img.onerror = function() {
                 this.src = "assets/images/characters/2.png";
             };
             return img;
         }
 
-        // ===== 5. GAME LOOP =====
-        let keys = { up: false, down: false, left: false, right: false };
-        let moveInterval = null;
-        let bullets = [];
+        function updateAnimation() {
+            let config = ANIMATION_CONFIG[currentAnimation];
+            if (!config) return;
+            animationFrameCounter++;
+            if (animationFrameCounter >= config.frameDelay) {
+                animationFrameCounter = 0;
+                currentFrameIndex++;
+                if (currentFrameIndex >= config.totalFrames) {
+                    if (currentAnimation === 'attack') {
+                        setAnimation(config.nextState);
+                    } else {
+                        currentFrameIndex = 0;
+                    }
+                }
+            }
+        }
+
         let monsters = [];
-        let spawnTimer = 0;
-        let particles = [];
+        let playerBullets = [];
+        let particleSystems = [];
         let floatingTexts = [];
+        let monsterSpawnTimer = 0;
 
-        // Engine hiệu ứng (Giữ nguyên từ bản cũ)
-        function createExplosion(x, y, color = '#ff4400', count = 20) {
-            for(let i = 0; i < count; i++) {
+        function spawnExplosion(x, y, color = '#ff4400', count = 30) {
+            for (let i = 0; i < count; i++) {
                 let angle = Math.random() * Math.PI * 2;
-                let speed = 2 + Math.random() * 5;
-                particles.push({
-                    x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1,
-                    life: 30 + Math.random() * 30, maxLife: 30 + Math.random() * 30,
-                    size: 4 + Math.random() * 6, color: color
+                let speed = 2 + Math.random() * 6;
+                particleSystems.push({
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1.5,
+                    life: 30 + Math.random() * 30,
+                    maxLife: 30 + Math.random() * 30,
+                    size: 4 + Math.random() * 6,
+                    color: color
                 });
             }
         }
-        function createFloatingText(x, y, text, color = '#ffcc00') {
-            floatingTexts.push({ x: x, y: y, text: text, color: color, life: 60, vy: -2 });
-        }
 
-        function update() {
-            if (!isPlaying) return;
-            
-            // ===== Player Input =====
-            let dx=0, dy=0;
-            if(keys.up) dy = -player.speed;
-            if(keys.down) dy = player.speed;
-            if(keys.left) { dx = -player.speed; player.facing = -1; }
-            if(keys.right) { dx = player.speed; player.facing = 1; }
-
-            // Animation Logic
-            if (dx !== 0 || dy !== 0) {
-                playAnim('run');
-            } else {
-                playAnim('idle');
-            }
-
-            player.x = Math.max(player.w/2, Math.min(WORLD_W - player.w/2, player.x + dx));
-            player.y = Math.max(player.h/2, Math.min(WORLD_H - player.h/2, player.y + dy));
-            camera.x = player.x - canvas.width/2;
-            camera.y = player.y - canvas.height/2;
-
-            // Update Animation Frame
-            animTimer++;
-            if (animTimer >= animConfig[currentAnim].speed) {
-                animTimer = 0;
-                frameIndex++;
-                if (frameIndex >= animConfig[currentAnim].frames) {
-                    if (currentAnim === 'attack' || currentAnim === 'jump') {
-                        playAnim(animConfig[currentAnim].next); // Tự động chuyển về idle
-                    }
-                }
-            }
-
-            // ===== Spawn Monster =====
-            spawnTimer++;
-            let maxMonsters = 3 + Math.floor(player.level / 3);
-            if(spawnTimer > 60 && monsters.length < maxMonsters) {
-                spawnTimer = 0;
-                let lvBonus = player.level * 10;
-                monsters.push({
-                    x: Math.random() * WORLD_W, y: Math.random() * WORLD_H,
-                    w: 30, h: 30, speed: 1.5 + player.level/5,
-                    hp: 60 + lvBonus, maxHp: 60 + lvBonus,
-                    dmg: 8 + player.level, attackCooldown: 0
-                });
-            }
-
-            // ===== Monster AI =====
-            monsters.forEach((m, idx) => {
-                let angle = Math.atan2(player.y - m.y, player.x - m.x);
-                m.x += Math.cos(angle) * m.speed;
-                m.y += Math.sin(angle) * m.speed;
-                let dist = Math.hypot(player.x - m.x, player.y - m.y);
-                if (dist < (player.w/2 + m.w/2) && m.attackCooldown <= 0) {
-                    player.hp -= m.dmg;
-                    m.attackCooldown = 40;
-                    if(player.hp <= 0) {
-                        player.hp = 0; isPlaying = false;
-                        playAnim('die');
-                        document.getElementById('btnAttack').style.pointerEvents = 'none';
-                        setTimeout(() => { window.location.href = "index.html"; }, 1500);
-                    }
-                }
-                if(m.attackCooldown > 0) m.attackCooldown--;
+        function spawnFloatingText(x, y, text, color = '#ffcc00') {
+            floatingTexts.push({
+                x: x, y: y,
+                text: text,
+                color: color,
+                life: 60,
+                vy: -2.5
             });
+        }
 
-            // ===== Bullets =====
-            bullets.forEach((b, bIdx) => {
-                b.x += b.vx; b.y += b.vy;
-                if(b.x < 0 || b.x > WORLD_W || b.y < 0 || b.y > WORLD_H) { bullets.splice(bIdx, 1); return; }
-                for(let i=0; i<monsters.length; i++) {
-                    let m = monsters[i];
-                    let dist = Math.hypot(m.x - b.x, m.y - b.y);
-                    if(dist < (m.w/2 + 10)) {
-                        m.hp -= 50;
-                        bullets.splice(bIdx, 1);
-                        if(m.hp <= 0) {
-                            createExplosion(m.x, m.y, '#ff6600', 25);
-                            createFloatingText(m.x, m.y - 20, '+'+ (100 + (player.level * 20)) +' EXP', '#2ecc71');
-                            
+        function spawnMonster() {
+            let maxMonsters = 4 + Math.floor(player.level / 3);
+            if (monsters.length >= maxMonsters) return;
+            let levelBonus = player.level * 10;
+            monsters.push({
+                x: Math.random() * WORLD_WIDTH,
+                y: Math.random() * WORLD_HEIGHT,
+                width: 30, height: 30,
+                speed: 1.2 + (player.level / 6),
+                hp: 60 + levelBonus, maxHp: 60 + levelBonus,
+                damage: 8 + player.level,
+                attackCooldown: 0, attackDelay: 40
+            });
+        }
+
+        function firePlayerBullet() {
+            if (player.kp < 15 || !isGameActive) return;
+            player.kp -= 15;
+            setAnimation('attack');
+
+            let targetAngle = -Math.PI / 2;
+            let nearestMonster = null;
+            let minDistance = Infinity;
+
+            for (let m of monsters) {
+                let dx = m.x - player.x;
+                let dy = m.y - player.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    nearestMonster = m;
+                }
+            }
+            if (nearestMonster) {
+                targetAngle = Math.atan2(nearestMonster.y - player.y, nearestMonster.x - player.x);
+            }
+
+            playerBullets.push({
+                x: player.x, y: player.y,
+                vx: Math.cos(targetAngle) * 10,
+                vy: Math.sin(targetAngle) * 10,
+                radius: 8, damage: 50
+            });
+            updateHUD();
+        }
+
+        let gameLoopInterval = null;
+        let frameRate = 16;
+
+        function updateGameLogic() {
+            if (!isGameActive || !isCharacterSelected) return;
+
+            let dx = 0, dy = 0;
+            if (inputState.up) dy = -player.speed;
+            if (inputState.down) dy = player.speed;
+            if (inputState.left) { dx = -player.speed; player.facing = -1; }
+            if (inputState.right) { dx = player.speed; player.facing = 1; }
+
+            if (dx !== 0 || dy !== 0) {
+                if (currentAnimation !== 'attack') setAnimation('run');
+            } else {
+                if (currentAnimation !== 'attack') setAnimation('idle');
+            }
+
+            let nextX = player.x + dx;
+            if (!checkCollision(nextX, player.y, player.width, player.height)) {
+                player.x = nextX;
+            }
+            let nextY = player.y + dy;
+            if (!checkCollision(player.x, nextY, player.width, player.height)) {
+                player.y = nextY;
+            }
+
+            camera.x = player.x - canvas.width / 2;
+            camera.y = player.y - canvas.height / 2;
+
+            updateAnimation();
+
+            monsterSpawnTimer++;
+            if (monsterSpawnTimer > 50) {
+                monsterSpawnTimer = 0;
+                spawnMonster();
+            }
+
+            for (let i = monsters.length - 1; i >= 0; i--) {
+                let m = monsters[i];
+                let angleToPlayer = Math.atan2(player.y - m.y, player.x - m.x);
+                m.x += Math.cos(angleToPlayer) * m.speed;
+                m.y += Math.sin(angleToPlayer) * m.speed;
+
+                let distToPlayer = Math.hypot(player.x - m.x, player.y - m.y);
+                if (distToPlayer < (player.width / 2 + m.width / 2) && m.attackCooldown <= 0) {
+                    player.hp -= m.damage;
+                    m.attackCooldown = m.attackDelay;
+                    spawnExplosion(m.x, m.y, '#ff0000', 10);
+
+                    if (player.hp <= 0) {
+                        player.hp = 0;
+                        isGameActive = false;
+                        clearInterval(gameLoopInterval);
+                        setAnimation('die');
+                        setTimeout(() => {
+                            alert("Bạn đã chết! Quay về trang chủ.");
+                            window.location.href = "index.html";
+                        }, 1500);
+                    }
+                }
+                if (m.attackCooldown > 0) m.attackCooldown--;
+            }
+
+            for (let i = playerBullets.length - 1; i >= 0; i--) {
+                let b = playerBullets[i];
+                b.x += b.vx;
+                b.y += b.vy;
+
+                if (b.x < 0 || b.x > WORLD_WIDTH || b.y < 0 || b.y > WORLD_HEIGHT) {
+                    playerBullets.splice(i, 1);
+                    continue;
+                }
+
+                let bulletHit = false;
+                for (let j = monsters.length - 1; j >= 0; j--) {
+                    let m = monsters[j];
+                    let distBulletMonster = Math.hypot(m.x - b.x, m.y - b.y);
+                    if (distBulletMonster < (m.width / 2 + b.radius)) {
+                        m.hp -= b.damage;
+                        bulletHit = true;
+                        if (m.hp <= 0) {
+                            spawnExplosion(m.x, m.y, '#ff8800', 40);
+                            spawnFloatingText(m.x, m.y - 20, '+ EXP', '#2ecc71');
                             player.exp += 100 + (player.level * 20);
                             player.kills++;
                             player.hp = Math.min(player.maxHp, player.hp + 30);
                             player.kp = Math.min(player.maxKp, player.kp + 30);
                             checkLevelUp();
+                            savePlayerData();
                             updateHUD();
-                            saveGame();
-                            monsters.splice(i, 1);
+                            monsters.splice(j, 1);
                         }
                         break;
                     }
                 }
-            });
-
-            // ===== Regen =====
-            if(player.kp < player.maxKp) player.kp += 0.2;
-            if(player.hp < player.maxHp && player.hp > 0) player.hp += 0.2;
-            
-            // ===== Engine Update =====
-            // Update Particles
-            for(let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.1;
-                p.life--; if(p.life <= 0) { particles.splice(i, 1); }
-            }
-            // Update Floating Text
-            for(let i = floatingTexts.length - 1; i >= 0; i--) {
-                let ft = floatingTexts[i]; ft.y += ft.vy; ft.life--;
-                if(ft.life <= 0) { floatingTexts.splice(i, 1); }
-            }
-        }
-
-        function checkLevelUp() {
-            let expNeeded = 100000 * player.level;
-            while(player.exp >= expNeeded) {
-                player.exp -= expNeeded; player.level++;
-                player.maxHp += 100; player.maxKp += 100;
-                player.hp = player.maxHp; player.kp = player.maxKp;
-                expNeeded = 100000 * player.level;
-                createExplosion(player.x, player.y, '#f1c40f', 50);
-                createFloatingText(player.x, player.y - 30, '🎊 LEVEL UP!', '#9b59b6');
-            }
-        }
-
-        // ===== 6. DRAW =====
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Vẽ nền
-            ctx.fillStyle = '#3e2723'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for(let x = -camera.x%80; x < canvas.width+80; x+=80) {
-                for(let y = -camera.y%80; y < canvas.height+80; y+=80) {
-                    ctx.fillStyle = ((Math.floor((x + camera.x)/80) + Math.floor((y + camera.y)/80)) % 2 === 0) ? '#4e342e' : '#2d1b14';
-                    ctx.fillRect(x, y, 80, 80);
+                if (bulletHit) {
+                    playerBullets.splice(i, 1);
                 }
             }
 
-            // Vẽ Quái
-            monsters.forEach(m => {
-                let sx = m.x - camera.x, sy = m.y - camera.y;
-                ctx.fillStyle='red'; ctx.fillRect(sx-m.w/2, sy-m.h/2-10, m.w, 4);
-                ctx.fillStyle='#2ecc71'; ctx.fillRect(sx-m.w/2, sy-m.h/2-10, m.w * (m.hp/m.maxHp), 4);
-                ctx.fillStyle = '#e74c3c'; ctx.beginPath(); ctx.arc(sx, sy, m.w/2, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = 'white'; ctx.font = '14px Arial'; ctx.fillText('👹', sx-12, sy+5);
-            });
+            if (player.kp < player.maxKp) player.kp += 0.3;
+            if (player.hp < player.maxHp && player.hp > 0) player.hp += 0.2;
 
-            // Vẽ đạn
-            ctx.fillStyle = '#00ffcc';
-            bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x - camera.x, b.y - camera.y, 8, 0, Math.PI*2); ctx.fill(); });
-
-            // Vẽ Player (Với Sprite Animation)
-            let px = player.x - camera.x, py = player.y - camera.y;
-            let currentSprite = getCurrentSprite();
-            
-            // Lưu context để lật ảnh
-            ctx.save();
-            ctx.translate(px, py);
-            // Nếu quay sang trái (-1) thì lật ngang ảnh
-            if (player.facing === -1) {
-                ctx.scale(-1, 1);
+            for (let i = particleSystems.length - 1; i >= 0; i--) {
+                let p = particleSystems[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.15;
+                p.life--;
+                if (p.life <= 0) { particleSystems.splice(i, 1); }
             }
-            
-            if (currentSprite && currentSprite.complete && currentSprite.naturalWidth > 0) {
-                ctx.drawImage(currentSprite, -player.w/2, -player.h/2, player.w, player.h);
-            } else {
-                // Fallback màu
-                ctx.fillStyle = '#00b894';
-                ctx.fillRect(-player.w/2, -player.h/2, player.w, player.h);
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                let ft = floatingTexts[i];
+                ft.y += ft.vy;
+                ft.life--;
+                if (ft.life <= 0) { floatingTexts.splice(i, 1); }
             }
-            ctx.restore();
 
-            // Vẽ Particle và Text
-            particles.forEach(p => {
-                let alpha = p.life / p.maxLife;
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x - camera.x, p.y - camera.y, p.size, 0, Math.PI * 2); ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-            floatingTexts.forEach(ft => {
-                ctx.fillStyle = ft.color;
-                ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center';
-                ctx.fillText(ft.text, ft.x - camera.x, ft.y - camera.y);
-            });
-        }
-
-        // ===== 7. MAIN LOOP =====
-        let loopRunning = false;
-        function gameLoop() {
-            if(!loopRunning) return;
-            update(); draw(); requestAnimationFrame(gameLoop);
-        }
-        function startGameLoop() { loopRunning = true; gameLoop(); }
-
-        // ===== 8. CONTROLS =====
-        function startMove(dir) { if(moveInterval) clearInterval(moveInterval); keys[dir]=true; moveInterval = setInterval(update, 16); }
-        function stopMove() { keys.up=keys.down=keys.left=keys.right=false; if(moveInterval){clearInterval(moveInterval); moveInterval=null;} }
-
-        function playerAttack() {
-            if(player.kp < 15 || !isPlaying) return;
-            player.kp -= 15;
-            playAnim('attack'); // Kích hoạt animation đánh
-            
-            let angle = -Math.PI/2;
-            let target = null; let minDist = Infinity;
-            monsters.forEach(m => { let d = Math.hypot(player.x-m.x, player.y-m.y); if(d<minDist){minDist=d; target=m;} });
-            if(target) angle = Math.atan2(target.y - player.y, target.x - player.x);
-            bullets.push({x:player.x, y:player.y, vx:Math.cos(angle)*10, vy:Math.sin(angle)*10});
             updateHUD();
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'w'||e.key==='W') startMove('up');
-            if (e.key === 's'||e.key==='S') startMove('down');
-            if (e.key === 'a'||e.key==='A') startMove('left');
-            if (e.key === 'd'||e.key==='D') startMove('right');
-            if (e.key === ' ') { e.preventDefault(); playerAttack(); }
-        });
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'w'||e.key==='W'||e.key==='s'||e.key==='S'||e.key==='a'||e.key==='A'||e.key==='d'||e.key==='D') stopMove();
-        });
+        function renderGraphics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            renderWorld();
 
-        // ===== 9. SELECT CHARACTER =====
-        function selectCharacter(path) {
-            // Trong trường hợp có cả bộ sprite cho từng nhân vật, ta sẽ load vào basePath
-            // Ở đây mình để basePath là thư mục player chung
-            document.getElementById('avatarImg').src = path;
-            document.getElementById('charSelectOverlay').style.display = 'none';
-            startGameLoop();
+            for (let m of monsters) {
+                let sx = m.x - camera.x;
+                let sy = m.y - camera.y;
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(sx - m.width/2, sy - m.height/2 - 12, m.width, 6);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(sx - m.width/2 + 1, sy - m.height/2 - 11, (m.width - 2) * (m.hp / m.maxHp), 4);
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(sx, sy, m.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('👹', sx, sy);
+            }
+
+            for (let b of playerBullets) {
+                let sx = b.x - camera.x;
+                let sy = b.y - camera.y;
+                ctx.beginPath();
+                ctx.arc(sx, sy, b.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#00ffcc';
+                ctx.shadowColor = '#00ffcc';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            let px = player.x - camera.x;
+            let py = player.y - camera.y;
+            let currentSprite = getCurrentSprite();
+            
+            ctx.save();
+            ctx.translate(px, py);
+            if (player.facing === -1) ctx.scale(-1, 1);
+            
+            if (currentSprite && currentSprite.complete && currentSprite.naturalWidth > 0) {
+                ctx.drawImage(currentSprite, -player.width/2, -player.height/2, player.width, player.height);
+            } else {
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
+            }
+            ctx.restore();
+
+            for (let p of particleSystems) {
+                let sx = p.x - camera.x;
+                let sy = p.y - camera.y;
+                let alpha = p.life / p.maxLife;
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(sx, sy, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1.0;
+
+            for (let ft of floatingTexts) {
+                let sx = ft.x - camera.x;
+                let sy = ft.y - camera.y;
+                ctx.fillStyle = ft.color;
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(ft.text, sx, sy);
+            }
         }
 
-        // ===== 10. HUD =====
+        function startGameLoop() {
+            if (gameLoopInterval) clearInterval(gameLoopInterval);
+            gameLoopInterval = setInterval(() => {
+                updateGameLogic();
+                renderGraphics();
+            }, frameRate);
+        }
+
+        function checkLevelUp() {
+            let expRequired = 100000 * player.level;
+            while (player.exp >= expRequired) {
+                player.exp -= expRequired;
+                player.level++;
+                player.maxHp += 100;
+                player.maxKp += 100;
+                player.hp = player.maxHp;
+                player.kp = player.maxKp;
+                expRequired = 100000 * player.level;
+                spawnExplosion(player.x, player.y, '#f1c40f', 50);
+                spawnFloatingText(player.x, player.y - 30, '🎊 LEVEL UP!', '#9b59b6');
+            }
+        }
+
+        // ==========================================
+        // LOGIC ANALOG STICK (Xử lý joystick vòng tròn)
+        // ==========================================
+        const inputState = { up: false, down: false, left: false, right: false };
+        let joystickActive = false;
+        let joystickTouchId = null;
+
+        function getJoystickInput(clientX, clientY) {
+            const zone = document.getElementById('joystickZone');
+            const rect = zone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const radius = rect.width / 2;
+
+            // Tính vector từ tâm ra điểm chạm
+            let dx = clientX - centerX;
+            let dy = clientY - centerY;
+            let distance = Math.hypot(dx, dy);
+
+            // Giới hạn bên trong vòng tròn
+            if (distance > radius) {
+                dx = (dx / distance) * radius;
+                dy = (dy / distance) * radius;
+                distance = radius;
+            }
+
+            // Di chuyển nút gạt (Knob) theo vị trí ngón tay
+            const knob = document.getElementById('stickKnob');
+            knob.style.left = `calc(50% + ${dx}px)`;
+            knob.style.top = `calc(50% + ${dy}px)`;
+
+            // Tính toán hướng di chuyển và tốc độ (dựa trên phần trăm khoảng cách)
+            let normalized = distance / radius; // 0 -> 1
+            let speedMultiplier = Math.min(normalized, 1.0);
+
+            // Ngưỡng kích hoạt (Deadzone) để tránh rung lắc
+            if (normalized < 0.15) {
+                inputState.up = false; inputState.down = false;
+                inputState.left = false; inputState.right = false;
+                player.speed = 4; // Reset về tốc độ mặc định khi thả
+                return;
+            }
+
+            // Tính góc
+            let angle = Math.atan2(dy, dx);
+            
+            // Cập nhật biến inputState (xử lý 8 hướng)
+            let absX = Math.abs(Math.cos(angle));
+            let absY = Math.abs(Math.sin(angle));
+
+            inputState.up = (dy < 0 && absY > absX) || (dy < 0 && absY < 0.2);
+            inputState.down = (dy > 0 && absY > absX) || (dy > 0 && absY < 0.2);
+            inputState.left = (dx < 0 && absX > absY) || (dx < 0 && absX < 0.2);
+            inputState.right = (dx > 0 && absX > absY) || (dx > 0 && absX < 0.2);
+            
+            // Thay đổi tốc độ dựa trên độ xa của ngón tay
+            player.speed = 4 * speedMultiplier; // Tốc độ tối đa là 4
+        }
+
+        function startStick(e) {
+            e.preventDefault();
+            const touch = e.touches ? e.touches[0] : e;
+            joystickActive = true;
+            document.getElementById('joystickZone').classList.add('active');
+            getJoystickInput(touch.clientX, touch.clientY);
+        }
+
+        function moveStick(e) {
+            e.preventDefault();
+            if (!joystickActive) return;
+            const touch = e.touches ? e.touches[0] : e;
+            getJoystickInput(touch.clientX, touch.clientY);
+        }
+
+        function stopStick() {
+            joystickActive = false;
+            document.getElementById('joystickZone').classList.remove('active');
+            // Reset nút gạt về giữa
+            const knob = document.getElementById('stickKnob');
+            knob.style.left = '50%';
+            knob.style.top = '50%';
+            
+            // Reset trạng thái di chuyển
+            inputState.up = false; inputState.down = false;
+            inputState.left = false; inputState.right = false;
+            player.speed = 4;
+        }
+
+        // ==========================================
+
+        function playerAttack() { firePlayerBullet(); }
+
+        // Hỗ trợ phím bàn phím PC (WASD vẫn hoạt động song song)
+        document.addEventListener('keydown', function(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w') { inputState.up = true; e.preventDefault(); }
+            else if (key === 's') { inputState.down = true; e.preventDefault(); }
+            else if (key === 'a') { inputState.left = true; e.preventDefault(); }
+            else if (key === 'd') { inputState.right = true; e.preventDefault(); }
+            else if (key === ' ' || key === 'e') { e.preventDefault(); playerAttack(); }
+        });
+        document.addEventListener('keyup', function(e) {
+            const key = e.key.toLowerCase();
+            if (key === 'w') { inputState.up = false; e.preventDefault(); }
+            else if (key === 's') { inputState.down = false; e.preventDefault(); }
+            else if (key === 'a') { inputState.left = false; e.preventDefault(); }
+            else if (key === 'd') { inputState.right = false; e.preventDefault(); }
+        });
+
         function updateHUD() {
-            document.getElementById('hpBar').style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
-            document.getElementById('kpBar').style.width = Math.max(0, (player.kp / player.maxKp) * 100) + '%';
+            let hpPercent = Math.max(0, (player.hp / player.maxHp) * 100);
+            let kpPercent = Math.max(0, (player.kp / player.maxKp) * 100);
+            document.getElementById('hpBar').style.width = hpPercent + '%';
+            document.getElementById('kpBar').style.width = kpPercent + '%';
             document.getElementById('hpText').innerText = `${Math.max(0, Math.floor(player.hp))}/${player.maxHp}`;
             document.getElementById('kpText').innerText = `${Math.max(0, Math.floor(player.kp))}/${player.maxKp}`;
             document.getElementById('lvText').innerText = player.level;
             document.getElementById('expText').innerText = player.exp.toLocaleString('vi-VN');
         }
 
+        function selectCharacter(path) {
+            if (isCharacterSelected) return;
+            document.getElementById('avatarImg').src = path;
+            document.getElementById('charSelectOverlay').style.display = 'none';
+            isCharacterSelected = true;
+            isGameActive = true;
+            monsterSpawnTimer = 0;
+            startGameLoop();
+            console.log("Game Engine started. Using Analog Stick.");
+        }
+
         resizeCanvas();
+        updateHUD();
+        console.log("RPG Engine v2.0 Loaded. Analog Stick control enabled.");
     </script>
 </body>
 </html>
