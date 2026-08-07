@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vương Quốc Gold - Ai Là Vua?</title>
+    
+    <!-- Thư viện Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; user-select: none; }
+        body {
+            min-height: 100vh;
+            background: #0b0c10 url('https://rehire-idealism-unseeing.ngrok-free.dev/vuongquocgold/magrdinhmenh.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 85px;
+            min-height: 100vh;
+            background: rgba(13, 14, 22, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 204, 0, 0.2);
+            padding: 15px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            flex-shrink: 0;
+        }
+        .sidebar .logo-text { color: #ffcc00; font-size: 11px; font-weight: bold; text-align: center; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,204,0,0.3); line-height: 1.2; }
+        .nav-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 5px;
+            color: #aaa;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-height: 55px;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(3px); color: white; }
+        .nav-btn.active { background: rgba(255, 204, 0, 0.2); border-color: #ffcc00; color: #ffcc00; }
+        .nav-btn .icon { font-size: 18px; }
+        .nav-btn .label { font-size: 9px; line-height: 1.1; }
+        .nav-btn.comingsoon { opacity: 0.5; cursor: not-allowed; }
+
+        .main-content { flex: 1; max-width: 550px; display: flex; flex-direction: column; gap: 15px; margin: 0 auto; }
+        .main-card {
+            width: 100%;
+            background: rgba(13, 14, 22, 0.92);
+            border: 2px solid rgba(255, 204, 0, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.85);
+            text-align: center;
+        }
+        .title { font-size: 26px; font-weight: bold; color: #ffcc00; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255,204,0,0.3); }
+        .desc { font-size: 13px; color: #ccc; line-height: 1.5; }
+
+        #userInfoBox { display: none; justify-content: space-between; align-items: center; text-align: left; padding: 5px 0; }
+        #userInfoBox .user-detail { font-size: 13px; }
+        #userInfoBox .gold-display { font-size: 18px; font-weight: bold; color: #ffcc00; }
+        .btn-logout { background: #d63031; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: all 0.2s; }
+        .btn-logout:hover { background: #c0392b; transform: scale(1.05); }
+
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: #ccc; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .tab-btn:hover { color: white; }
+        .tab-btn.active { color: #ffcc00; border-bottom: 2px solid #ffcc00; }
+
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 4px; font-size: 12px; color: #aaa; }
+        .form-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #252631; color: white; font-size: 14px; outline: none; transition: border 0.3s; }
+        .form-group input:focus { border-color: #ffcc00; }
+
+        .btn-submit { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #ffcc00; color: #000; font-weight: bold; font-size: 14px; cursor: pointer; margin-top: 5px; transition: all 0.2s; }
+        .btn-submit:hover { transform: scale(1.02); opacity: 0.9; }
+
+        .game-section { margin: 15px 0; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .game-title { font-size: 20px; color: #ffcc00; font-weight: bold; margin-bottom: 10px; }
+        .btn-join-game {
+            background: linear-gradient(135deg, #ffcc00, #f57c00); color: #000; border: none;
+            padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s; width: 100%;
+        }
+        .btn-join-game:hover { transform: scale(1.02); box-shadow: 0 5px 20px rgba(255,204,0,0.3); }
+        .btn-join-game:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Leaderboard Toàn Cục */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .leaderboard-table th { color: #ffcc00; padding: 10px; border-bottom: 2px solid #ffcc00; font-size: 13px; }
+        .leaderboard-table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 13px; }
+        .leaderboard-table tr:hover td { background: rgba(255, 255, 255, 0.05); }
+        .rank-1 { color: #ffd700; } .rank-2 { color: #c0c0c0; } .rank-3 { color: #cd7f32; }
+
+        /* Arena Map */
+        .arena-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .arena-container.active { display: flex; }
+        .arena-map { width: 600px; height: 400px; background: #1a1a2e; border: 3px solid #ffcc00; border-radius: 20px; position: relative; overflow: hidden; }
+        .arena-ground { position: absolute; width: 100%; height: 100%; background: linear-gradient(180deg, #2d2d44, #1a1a2e); }
+
+        .npc { position: absolute; width: 60px; height: 80px; bottom: 50px; right: 100px; cursor: pointer; transition: all 0.3s; z-index: 10; }
+        .npc:hover { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,204,0,0.5)); }
+        .npc img { width: 100%; height: 100%; object-fit: contain; }
+
+        .player-char { position: absolute; width: 50px; height: 70px; bottom: 50px; left: 100px; transition: all 0.5s ease; z-index: 10; }
+        .player-char img { width: 100%; height: 100%; object-fit: contain; }
+
+        .speech-bubble {
+            position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95); color: #000; padding: 10px 15px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; white-space: nowrap; opacity: 0; transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); pointer-events: none;
+        }
+        .speech-bubble::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid rgba(255, 255, 255, 0.95);
+        }
+        .npc:hover .speech-bubble { opacity: 1; }
+
+        .question-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 10000; justify-content: center; align-items: center; }
+        .question-modal.active { display: flex; }
+        .question-box { background: #1e1e2e; border: 2px solid #ffcc00; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .question-box .timer { font-size: 40px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
+        .question-box .timer.warning { color: #ff4444; animation: blink 0.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .question-box .q-text { font-size: 18px; color: #fff; margin-bottom: 20px; line-height: 1.5; }
+        .question-box .q-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .question-box .q-option { background: #2a2a3e; border: 2px solid #444; color: #fff; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .question-box .q-option:hover { background: #3a3a5e; border-color: #ffcc00; transform: scale(1.02); }
+        .question-box .q-option.correct { background: #2e7d32; border-color: #4caf50; }
+        .question-box .q-option.wrong { background: #c62828; border-color: #f44336; }
+        .question-box .q-option:disabled { cursor: not-allowed; opacity: 0.7; }
+        .question-box .result-text { font-size: 20px; font-weight: bold; margin: 15px 0; }
+        .question-box .result-text.win { color: #4caf50; }
+        .question-box .result-text.lose { color: #f44336; }
+
+        .btn-exit-arena { position: fixed; top: 20px; right: 20px; background: #d63031; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; z-index: 10001; transition: all 0.2s; }
+        .btn-exit-arena:hover { background: #c0392b; transform: scale(1.05); }
+        .move-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10001; }
+        .move-btn { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #ffcc00; background: rgba(0, 0, 0, 0.7); color: #ffcc00; font-size: 24px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .move-btn:hover { background: rgba(255, 204, 0, 0.2); transform: scale(1.1); }
+        .move-btn:active { transform: scale(0.9); }
+
+        @media (max-width: 700px) {
+            body { flex-direction: column; padding: 10px; align-items: center; }
+            .sidebar { width: 100%; min-height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; position: relative; top: 0; gap: 5px; }
+            .sidebar .logo-text { display: none; }
+            .nav-btn { width: auto; min-height: 40px; padding: 6px 12px; flex-direction: row; gap: 6px; font-size: 10px; }
+            .main-content { max-width: 100%; margin: 0; }
+            .title { font-size: 20px; }
+            .arena-map { width: 95vw; height: 60vh; }
+            .question-box .q-options { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENU DỌC -->
+    <div class="sidebar">
+        <div class="logo-text">👑<br>VƯƠNG<br>QUỐC<br>GOLD</div>
+        <a href="index.html" class="nav-btn"><span class="icon">🏠</span><span class="label">Trang chủ</span></a>
+        <a href="chat.html" class="nav-btn"><span class="icon">💬</span><span class="label">Phòng chat</span></a>
+        <a href="game.html" class="nav-btn active"><span class="icon">👑</span><span class="label">Ai là vua?</span></a>
+        <a href="nap.html" class="nav-btn"><span class="icon">💳</span><span class="label">Nạp tiền</span></a>
+        <a href="doithuong.html" class="nav-btn"><span class="icon">🎁</span><span class="label">Đổi thưởng</span></a>
+    </div>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <div class="main-content">
+
+        <!-- CARD ĐĂNG NHẬP -->
+        <div class="main-card">
+            <div id="userInfoBox">
+                <div>
+                    <div class="user-detail">👤 Tài khoản: <b id="displayUsername" style="color: #00b894;">-</b></div>
+                    <div class="gold-display">💰 SỐ DƯ: <span id="userGold">0</span> GOLD</div>
+                </div>
+                <button class="btn-logout" onclick="userLogout()">Đăng xuất</button>
+            </div>
+
+            <div id="authBox">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" id="tabLoginBtn" onclick="switchTab('login')">Đăng Nhập</button>
+                    <button class="tab-btn" id="tabRegisterBtn" onclick="switchTab('register')">Đăng Ký</button>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Tên tài khoản</label>
+                        <input type="text" id="loginUser" required placeholder="Nhập tài khoản...">
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu...">
+                    </div>
+                    <button class="btn-submit" type="submit">🔑 ĐĂNG NHẬP</button>
+                </form>
+
+                <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
+                    <div class="form-group">
+                        <label>Tên tài khoản mới</label>
+                        <input type="text" id="regUser" required placeholder="Chọn tài khoản...">
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="regPass" required placeholder="Tạo mật khẩu...">
+                    </div>
+                    <button class="btn-submit" type="submit" style="background: #00b894;">✅ ĐĂNG KÝ</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CARD GAME -->
+        <div class="main-card">
+            <div class="title">👑 ĐẦU TRƯỜNG AI LÀ VUA</div>
+            <p class="desc">Xin chào nhà vua! Nhấn nút bên dưới để tham gia nhé! 😊</p>
+
+            <div class="game-section">
+                <div class="game-title">⚔️ THAM GIA TRANH VUA</div>
+                <p style="color: #ff6b6b; font-size: 14px; margin-bottom: 10px;">💰 Phí tham gia: 1,000 GOLD</p>
+                <button class="btn-join-game" id="btnJoinGame" onclick="joinGame()">👑 VÀO ĐẤU TRƯỜNG</button>
+            </div>
+
+            <!-- 👇 BẢNG XẾP HẠNG TOÀN CỤC -->
+            <div style="margin-top: 20px;">
+                <h3 style="color: #ffcc00; margin-bottom: 15px;">🏆 BẢNG XẾP HẠNG CAO THỦ</h3>
+                <table class="leaderboard-table" id="leaderboardTable">
+                    <thead>
+                        <tr>
+                            <th>Hạng</th>
+                            <th>Tên Nhà Vua</th>
+                            <th>Điểm Số</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <!-- JS tự render -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ====== KHU VỰC ĐẤU TRƯỜNG ====== -->
+    <div class="arena-container" id="arenaContainer">
+        <button class="btn-exit-arena" onclick="exitArena()">✕ Thoát</button>
+        
+        <!-- Bảng chọn nhân vật trước khi vào trò chơi -->
+        <div id="charSelectOverlay" style="position: absolute; width: 100%; height: 100%; top:0; left:0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 999; flex-direction: column;">
+            <h3 style="color: #ffcc00; margin-bottom: 20px; font-size: 24px;">Chọn Nhân Vật Của Bạn</h3>
+            <div style="display: flex; gap: 20px;">
+                <div onclick="selectCharacter('assets/images/characters/2.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/2.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧝%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Chiến binh</div>
+                </div>
+                <div onclick="selectCharacter('assets/images/characters/3.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/3.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧙%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Pháp sư</div>
+                </div>
+                <div onclick="selectCharacter('assets/images/characters/4.png')" style="cursor: pointer; border: 2px solid transparent; padding: 10px; border-radius: 10px; transition: 0.2s; background: rgba(255,255,255,0.05);" onmouseover="this.style.borderColor='#ffcc00'" onmouseout="this.style.borderColor='transparent'">
+                    <img src="assets/images/characters/4.png" style="width: 80px; height: 100px; object-fit: contain;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🗡️%3C/text%3E%3C/svg%3E'">
+                    <div style="color:white; text-align: center; margin-top: 5px;">Sát thủ</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arena-map" id="arenaMap">
+            <div class="arena-ground"></div>
+            <div class="npc" id="npcChar" onclick="talkToNPC()">
+                <img src="assets/images/characters/NPC.png" alt="NPC" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2280%22%3E%3Crect width=%2260%22 height=%2280%22 fill=%22%23ffcc00%22/%3E%3Ctext x=%2220%22 y=%2245%22 font-size=%2230%22%3E🧙%3C/text%3E%3C/svg%3E'">
+                <div class="speech-bubble" id="npcBubble">Click vào ta để trò chuyện! 🧙</div>
+            </div>
+            <div class="player-char" id="playerChar">
+                <img id="playerImg" src="assets/images/characters/2.png" alt="Player" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2270%22%3E%3Crect width=%2250%22 height=%2270%22 fill=%22%234caf50%22/%3E%3Ctext x=%2215%22 y=%2240%22 font-size=%2230%22%3E🦸%3C/text%3E%3C/svg%3E'">
+            </div>
+        </div>
+        <div class="move-controls">
+            <button class="move-btn" onclick="movePlayer('left')">⬅</button>
+            <button class="move-btn" onclick="movePlayer('up')">⬆</button>
+            <button class="move-btn" onclick="movePlayer('down')">⬇</button>
+            <button class="move-btn" onclick="movePlayer('right')">➡</button>
+        </div>
+    </div>
+
+    <!-- ====== HỘP THOẠI CÂU HỎI ====== -->
+    <div class="question-modal" id="questionModal">
+        <div class="question-box">
+            <div class="timer" id="timerDisplay">15</div>
+            <div class="q-text" id="questionText">Đang tải câu hỏi...</div>
+            <div class="q-options" id="optionsContainer">
+                <button class="q-option" onclick="selectAnswer(0)">A. ...</button>
+                <button class="q-option" onclick="selectAnswer(1)">B. ...</button>
+                <button class="q-option" onclick="selectAnswer(2)">C. ...</button>
+                <button class="q-option" onclick="selectAnswer(3)">D. ...</button>
+            </div>
+            <div id="resultDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 1. CẤU HÌNH FIREBASE =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
+            authDomain: "lang-la-tqb.firebaseapp.com",
+            databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
+            projectId: "lang-la-tqb",
+            storageBucket: "lang-la-tqb.firebasestorage.app",
+            messagingSenderId: "32586764344",
+            appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
+        };
+
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
+
+        // ===== 2. HỆ THỐNG USER (LocalStorage + Đồng bộ BXH lên Firebase) =====
+        function getUsers() { return JSON.parse(localStorage.getItem("app_users") || "{}"); }
+        function saveUsers(users) { localStorage.setItem("app_users", JSON.stringify(users)); }
+
+        function switchTab(type) {
+            if (type === 'login') {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('tabLoginBtn').classList.add('active');
+                document.getElementById('tabRegisterBtn').classList.remove('active');
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.getElementById('tabRegisterBtn').classList.add('active');
+                document.getElementById('tabLoginBtn').classList.remove('active');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            let u = document.getElementById('regUser').value.trim();
+            let p = document.getElementById('regPass').value.trim();
+            if (u.length < 3 || p.length < 6) { alert("Tài khoản tối thiểu 3 ký tự, mật khẩu 6 ký tự!"); return; }
+            let users = getUsers();
+            if (users[u]) { alert("Tài khoản đã tồn tại!"); return; }
+            users[u] = { password: p, gold: 100, score: 0 };
+            saveUsers(users);
+            localStorage.setItem("currentUser", u);
+            alert("Đăng ký thành công! Nhận 100 Gold.");
+            checkAuth();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            let u = document.getElementById('loginUser').value.trim();
+            let p = document.getElementById('loginPass').value.trim();
+            let users = getUsers();
+            if (!users[u] || users[u].password !== p) { alert("Sai tài khoản hoặc mật khẩu!"); return; }
+            localStorage.setItem("currentUser", u);
+            checkAuth();
+        }
+
+        function checkAuth() {
+            let currentUser = localStorage.getItem("currentUser") || "";
+            let users = getUsers();
+            if (currentUser && users[currentUser]) {
+                document.getElementById("authBox").style.display = "none";
+                document.getElementById("userInfoBox").style.display = "flex";
+                document.getElementById("displayUsername").innerText = currentUser;
+                document.getElementById("userGold").innerText = (users[currentUser].gold || 0).toLocaleString('vi-VN');
+                updateGameButton();
+                listenToGoldFromAdmin(currentUser);
+                renderGlobalLeaderboard();
+            } else {
+                document.getElementById("authBox").style.display = "block";
+                document.getElementById("userInfoBox").style.display = "none";
+                document.getElementById("btnJoinGame").disabled = true;
+            }
+        }
+
+        function userLogout() {
+            if (confirm("Bạn có chắc muốn đăng xuất?")) {
+                localStorage.removeItem("currentUser");
+                checkAuth();
+            }
+        }
+
+        // ===== 3. LẮNG NGHE GOLD TỪ ADMIN & ĐỒNG BỘ =====
+        function listenToGoldFromAdmin(username) {
+            if (!username) return;
+            db.ref('users/' + username + '/gold').on('value', (snapshot) => {
+                let serverGold = snapshot.val();
+                let users = getUsers();
+                if (serverGold !== null && users[username]) {
+                    users[username].gold = serverGold;
+                    saveUsers(users);
+                    document.getElementById("userGold").innerText = serverGold.toLocaleString('vi-VN');
+                    updateGameButton();
+                }
+            });
+        }
+
+        function updateGameButton() {
+            let currentUser = localStorage.getItem("currentUser");
+            let users = getUsers();
+            let btn = document.getElementById("btnJoinGame");
+            if (currentUser && users[currentUser]) {
+                let gold = users[currentUser].gold || 0;
+                if (gold >= 1000) { btn.disabled = false; btn.innerHTML = "👑 VÀO ĐẤU TRƯỜNG"; } 
+                else { btn.disabled = true; btn.innerHTML = `❌ Cần 1,000 GOLD (Bạn có ${gold.toLocaleString('vi-VN')} GOLD)`; }
+            } else { btn.disabled = true; btn.innerHTML = "🔒 Vui lòng đăng nhập"; }
+        }
+
+        // ===== 4. LẮNG NGHE CÂU HỎI TỪ ADMIN & XÁO TRỘN =====
+        let allQuestionsCache = [];
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let isGameComplete = false;
+
+        db.ref('questions').on('value', (snapshot) => {
+            let data = snapshot.val();
+            if (data) { 
+                allQuestionsCache = Object.values(data);
+                // Khi tải câu hỏi mới, reset trạng thái game
+                shuffledQuestions = [];
+                currentQuestionIndex = 0;
+                isGameComplete = false;
+            } else { 
+                allQuestionsCache = []; 
+            }
+        });
+
+        // Hàm xáo trộn mảng (Fisher-Yates)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // ===== 5. ĐẤU TRƯỜNG VÀ CHỌN NHÂN VẬT =====
+        let playerX = 100, playerY = 50, isInArena = false, isAnswering = false;
+        let timerInterval = null, timeLeft = 15, currentQuestion = null, isAnswered = false;
+
+        function joinGame() {
+            let currentUser = localStorage.getItem("currentUser");
+            let users = getUsers();
+            if (!currentUser || !users[currentUser]) { alert("Vui lòng đăng nhập!"); return; }
+            let user = users[currentUser];
+            if (user.gold < 1000) { alert(`Bạn không đủ Gold! Cần 1,000 Gold, bạn có ${user.gold.toLocaleString('vi-VN')} Gold.`); return; }
+
+            user.gold -= 1000;
+            saveUsers(users);
+            document.getElementById("userGold").innerText = user.gold.toLocaleString('vi-VN');
+            updateGameButton();
+            openArena();
+        }
+
+        function openArena() {
+            isInArena = true;
+            document.getElementById('arenaContainer').classList.add('active');
+            document.getElementById('charSelectOverlay').style.display = 'flex'; // Hiện bảng chọn nhân vật
+            playerX = 100; playerY = 50;
+            updatePlayerPosition();
+            document.getElementById('npcBubble').textContent = 'Hãy chọn nhân vật của bạn trước! 🧙';
+        }
+
+        function selectCharacter(imgSrc) {
+            document.getElementById('playerImg').src = imgSrc;
+            document.getElementById('charSelectOverlay').style.display = 'none'; // Ẩn bảng chọn
+            document.getElementById('npcBubble').textContent = 'Di chuyển đến NPC và Click vào ta để trò chuyện! 🧙';
+            alert(`✅ Bạn đã chọn nhân vật thành công! Hãy dùng nút di chuyển hoặc phím WASD để đi đến NPC.`);
+        }
+
+        function exitArena() {
+            if (isAnswering) {
+                if (!confirm("Bạn đang trả lời câu hỏi! Thoát sẽ mất cơ hội. Bạn có chắc?")) return;
+                clearInterval(timerInterval);
+                isAnswering = false;
+                document.getElementById('questionModal').classList.remove('active');
+            }
+            isInArena = false;
+            document.getElementById('arenaContainer').classList.remove('active');
+            document.getElementById('btnJoinGame').disabled = false;
+            document.getElementById('btnJoinGame').innerHTML = "👑 VÀO ĐẤU TRƯỜNG";
+        }
+
+        // ===== SỬA LẠI CHỨC NĂNG DI CHUYỂN (FIX LỖI & THÊM KEYBOARD) =====
+        function movePlayer(direction) {
+            if (!isInArena || isAnswering) return;
+            const step = 20;
+            const mapWidth = 600, mapHeight = 400;
+            const charWidth = 50, charHeight = 70;
+
+            // Giới hạn biên để nhân vật không đi ra ngoài map
+            switch(direction) {
+                case 'left': playerX = Math.max(0, playerX - step); break;
+                case 'right': playerX = Math.min(mapWidth - charWidth, playerX + step); break;
+                case 'up': playerY = Math.max(0, playerY - step); break;
+                case 'down': playerY = Math.min(mapHeight - charHeight, playerY + step); break;
+            }
+            updatePlayerPosition();
+            checkNearNPC();
+        }
+
+        // Thêm sự kiện bàn phím (WASD)
+        document.addEventListener('keydown', function(e) {
+            if (!isInArena || isAnswering) return;
+            if (e.key === 'w' || e.key === 'W') { e.preventDefault(); movePlayer('up'); }
+            if (e.key === 's' || e.key === 'S') { e.preventDefault(); movePlayer('down'); }
+            if (e.key === 'a' || e.key === 'A') { e.preventDefault(); movePlayer('left'); }
+            if (e.key === 'd' || e.key === 'D') { e.preventDefault(); movePlayer('right'); }
+        });
+
+        function updatePlayerPosition() {
+            const player = document.getElementById('playerChar');
+            player.style.left = playerX + 'px';
+            player.style.bottom = playerY + 'px';
+        }
+
+        function checkNearNPC() {
+            const npcX = 440, npcY = 50;
+            const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 30), 2) + Math.pow((playerY + 35) - (npcY + 40), 2));
+            const bubble = document.getElementById('npcBubble');
+            if (distance < 100) { bubble.textContent = 'Click vào ta để trò chuyện! 🧙'; bubble.style.opacity = '1'; } 
+            else { bubble.textContent = 'Đến gần ta hơn nào! 🏃'; bubble.style.opacity = '0.5'; }
+        }
+
+        function talkToNPC() {
+            if (!isInArena || isAnswering) return;
+            // Kiểm tra xem đã chọn nhân vật chưa
+            if (document.getElementById('charSelectOverlay').style.display !== 'none') {
+                alert("⚠️ Hãy chọn nhân vật ở trên trước khi nói chuyện với NPC!");
+                return;
+            }
+
+            const npcX = 440, npcY = 50;
+            const distance = Math.sqrt(Math.pow((playerX + 25) - (npcX + 30), 2) + Math.pow((playerY + 35) - (npcY + 40), 2));
+            if (distance > 100) { alert("🚶 Hãy đến gần NPC hơn để trò chuyện!"); return; }
+            startQuestion();
+        }
+
+        // ===== 6. LOGIC CÂU HỎI & XÁO TRỘN =====
+        function startQuestion() {
+            if (allQuestionsCache.length === 0) { 
+                alert("⏳ Hiện chưa có câu hỏi nào từ Admin! Vui lòng quay lại sau."); 
+                return; 
+            }
+
+            // Lần đầu chơi hoặc đã trả lời hết, thì xáo trộn lại
+            if (shuffledQuestions.length === 0 || currentQuestionIndex >= shuffledQuestions.length) {
+                if (shuffledQuestions.length > 0 && currentQuestionIndex >= shuffledQuestions.length) {
+                    isGameComplete = true;
+                }
+                
+                // Kiểm tra xem có câu hỏi mới không dựa trên số lượng admin đã thêm
+                if (allQuestionsCache.length > 0) {
+                    shuffledQuestions = shuffleArray([...allQuestionsCache]);
+                    currentQuestionIndex = 0;
+                    isGameComplete = false;
+                } else {
+                    isGameComplete = true;
+                }
+            }
+
+            if (isGameComplete || shuffledQuestions.length === 0) {
+                alert("🏆 Bạn đã chinh phục hết mọi câu hỏi! Hãy đợi Admin thêm câu hỏi mới nhé!");
+                // Đá người chơi ra khỏi đấu trường khi hết câu hỏi
+                document.getElementById('questionModal').classList.remove('active');
+                isAnswering = false;
+                isInArena = false;
+                document.getElementById('arenaContainer').classList.remove('active');
+                document.getElementById('btnJoinGame').disabled = false;
+                document.getElementById('btnJoinGame').innerHTML = "👑 VÀO ĐẤU TRƯỜNG";
+                return;
+            }
+
+            isAnswering = true; isAnswered = false; timeLeft = 15;
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            currentQuestionIndex++; // Tăng index cho câu hỏi tiếp theo
+            
+            document.getElementById('questionText').textContent = currentQuestion.question;
+            const options = document.querySelectorAll('.q-option');
+            let optArr = [currentQuestion.a, currentQuestion.b, currentQuestion.c, currentQuestion.d];
+            options.forEach((btn, index) => {
+                btn.textContent = `${String.fromCharCode(65 + index)}. ${optArr[index]}`;
+                btn.className = 'q-option'; btn.disabled = false;
+            });
+            document.getElementById('resultDisplay').innerHTML = '';
+            document.getElementById('timerDisplay').className = 'timer';
+            document.getElementById('timerDisplay').textContent = timeLeft;
+            document.getElementById('questionModal').classList.add('active');
+            
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timerDisplay').textContent = timeLeft;
+                if (timeLeft <= 5) document.getElementById('timerDisplay').className = 'timer warning';
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('resultDisplay').innerHTML = '<div class="result-text lose">⏰ Hết giờ! Bạn đã thua!</div>';
+                    document.querySelectorAll('.q-option').forEach(btn => btn.disabled = true);
+                    isAnswered = true;
+                    setTimeout(() => { 
+                        document.getElementById('questionModal').classList.remove('active'); 
+                        isAnswering = false; 
+                        document.getElementById('npcBubble').textContent = 'Lần sau nhớ nhanh hơn nhé! 😅'; 
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        // ===== HÀM QUAN TRỌNG: CẬP NHẬT BXH TOÀN CỤC =====
+        function selectAnswer(index) {
+            if (isAnswered) return;
+            isAnswered = true; clearInterval(timerInterval);
+            const options = document.querySelectorAll('.q-option');
+            options.forEach(btn => btn.disabled = true);
+            
+            let correctIndex = 0;
+            if (currentQuestion.correct === 'A') correctIndex = 0;
+            else if (currentQuestion.correct === 'B') correctIndex = 1;
+            else if (currentQuestion.correct === 'C') correctIndex = 2;
+            else if (currentQuestion.correct === 'D') correctIndex = 3;
+            
+            const isCorrect = (index === correctIndex);
+            const resultDiv = document.getElementById('resultDisplay');
+            
+            if (isCorrect) {
+                options[index].classList.add('correct');
+                let currentUser = localStorage.getItem("currentUser");
+                let users = getUsers();
+                
+                if (currentUser && users[currentUser]) {
+                    // 1. Cộng Gold (Local + Firebase)
+                    let newGold = (users[currentUser].gold || 0) + 50;
+                    users[currentUser].gold = newGold;
+                    saveUsers(users);
+                    db.ref('users/' + currentUser + '/gold').set(newGold);
+                    
+                    // 2. Cộng Điểm (Local + Firebase - ĐỂ BXH AI CŨNG THẤY)
+                    let currentScore = users[currentUser].score || 0;
+                    let newScore = currentScore + 5;
+                    users[currentUser].score = newScore;
+                    saveUsers(users);
+                    
+                    // Ghi điểm lên Cloud để đồng bộ
+                    db.ref('users/' + currentUser + '/score').set(newScore);
+
+                    // Cập nhật UI
+                    document.getElementById("userGold").innerText = newGold.toLocaleString('vi-VN');
+                    updateGameButton();
+                }
+                resultDiv.innerHTML = '<div class="result-text win">🎉 Chính xác! +50 GOLD & +5 Điểm</div>';
+                document.getElementById('npcBubble').textContent = 'Tuyệt vời! Bạn thật thông minh! 🌟';
+            } else {
+                options[index].classList.add('wrong');
+                options[correctIndex].classList.add('correct');
+                resultDiv.innerHTML = `<div class="result-text lose">❌ Sai rồi! Đáp án đúng là ${currentQuestion.correct}</div>`;
+                document.getElementById('npcBubble').textContent = 'Sai rồi! Cố gắng lần sau nhé! 💪';
+                
+                setTimeout(() => {
+                    document.getElementById('questionModal').classList.remove('active');
+                    isAnswering = false;
+                    isInArena = false;
+                    document.getElementById('arenaContainer').classList.remove('active');
+                    document.getElementById('btnJoinGame').disabled = false;
+                    document.getElementById('btnJoinGame').innerHTML = "👑 VÀO ĐẤU TRƯỜNG";
+                    document.getElementById('npcBubble').style.opacity = '0';
+                    clearInterval(timerInterval);
+                }, 2000);
+            }
+            
+            if (isCorrect) {
+                setTimeout(() => {
+                    document.getElementById('questionModal').classList.remove('active');
+                    isAnswering = false;
+                }, 2000);
+            }
+        }
+
+        // ===== 7. BẢNG XẾP HẠNG TOÀN CỤC (Lấy dữ liệu trực tiếp từ Firebase) =====
+        function renderGlobalLeaderboard() {
+            db.ref('users').on('value', (snapshot) => {
+                let data = snapshot.val();
+                let list = [];
+
+                if (data) {
+                    for (let [username, userData] of Object.entries(data)) {
+                        if (userData.score && userData.score > 0) {
+                            list.push({
+                                name: username,
+                                score: userData.score || 0
+                            });
+                        }
+                    }
+                }
+
+                // Sắp xếp điểm từ cao xuống thấp
+                list.sort((a, b) => b.score - a.score);
+
+                let tbody = document.getElementById("leaderboardBody");
+                let html = '';
+                
+                if (list.length === 0) {
+                    html = `<tr><td colspan="3" style="color: #888; padding: 15px;">🏆 Chưa có cao thủ nào!</td></tr>`;
+                } else {
+                    list.forEach((item, index) => {
+                        let rankClass = '';
+                        if (index === 0) rankClass = 'rank-1';
+                        else if (index === 1) rankClass = 'rank-2';
+                        else if (index === 2) rankClass = 'rank-3';
+
+                        html += `
+                            <tr>
+                                <td><span class="${rankClass}">#${index + 1}</span></td>
+                                <td>${item.name}</td>
+                                <td>${item.score} đ</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                tbody.innerHTML = html;
+            });
+        }
+
+        // ===== 8. KHỞI TẠO =====
+        checkAuth();
+    </script>
+</body>
+</html>
