@@ -3,462 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Chủ - Vương Quốc Gold</title>
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body {
-            min-height: 100vh;
-            background: #0b0c10 url('https://rehire-idealism-unseeing.ngrok-free.dev/vuongquocgold/magrdinhmenh.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .sidebar {
-            width: 85px;
-            min-height: 100vh;
-            background: rgba(13, 14, 22, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 204, 0, 0.2);
-            padding: 15px 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            flex-shrink: 0;
-        }
-
-        .sidebar .logo-text {
-            color: #ffcc00;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255,204,0,0.3);
-            line-height: 1.2;
-        }
-
-        .nav-btn {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 10px 5px;
-            color: #aaa;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-            min-height: 55px;
-        }
-        .nav-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(3px); color: white; }
-        .nav-btn.active { background: rgba(255, 204, 0, 0.2); border-color: #ffcc00; color: #ffcc00; }
-        .nav-btn .icon { font-size: 18px; }
-        .nav-btn .label { font-size: 9px; line-height: 1.1; }
-        .nav-btn.comingsoon { opacity: 0.5; cursor: not-allowed; }
-
-        .main-content {
-            flex: 1;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin: 0 auto;
-        }
-
-        .main-card {
-            width: 100%;
-            background: rgba(13, 14, 22, 0.92);
-            border: 2px solid rgba(255, 204, 0, 0.4);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.85);
-            text-align: center;
-        }
-
-        .title { 
-            font-size: 26px; 
-            font-weight: bold; 
-            color: #ffcc00; 
-            margin-bottom: 20px; 
-            text-shadow: 0 0 20px rgba(255,204,0,0.3);
-        }
-
-        #userInfoBox { display: none; justify-content: space-between; align-items: center; text-align: left; }
-        #userInfoBox .gold-display { font-size: 18px; font-weight: bold; color: #ffcc00; }
-        .btn-logout { background: #d63031; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-
-        .auth-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: #ccc; font-weight: bold; cursor: pointer; }
-        .tab-btn.active { color: #ffcc00; border-bottom: 2px solid #ffcc00; }
-
-        .form-group { margin-bottom: 12px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 4px; font-size: 12px; color: #aaa; }
-        .form-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #252631; color: white; outline: none; }
-        .form-group input:focus { border-color: #ffcc00; }
-
-        .btn-submit { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #ffcc00; color: #000; font-weight: bold; cursor: pointer; }
-        
-        /* BẢNG THÔNG BÁO SỰ KIỆN */
-        .event-board {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(46, 134, 222, 0.4);
-            text-align: left;
-        }
-        .event-board h4 { color: #2e86de; margin-bottom: 10px; font-size: 15px; }
-        .event-board ul { padding-left: 20px; color: #ddd; font-size: 13px; line-height: 1.8; }
-        .event-board ul li::marker { color: #ffcc00; }
-        .event-board .new { color: #ffcc00; font-weight: bold; background: rgba(255,204,0,0.2); padding: 0 5px; border-radius: 4px; font-size: 10px; }
-
-        /* KHU VỰC NHẬP GIFCODE */
-        .giftcode-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 15px;
-            background: rgba(255, 204, 0, 0.05);
-            border: 1px dashed #ffcc00;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-        .giftcode-input-group {
-            display: flex;
-            gap: 10px;
-        }
-        .giftcode-input-group input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background: #222;
-            color: #fff;
-            text-transform: uppercase;
-        }
-        .giftcode-input-group button {
-            padding: 0 20px;
-            background: linear-gradient(135deg, #00b894, #0984e3);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* 👇 KHU VỰC MỚI: CỔNG GAME (4 MÁY CHỦ) */
-        .server-gate {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .server-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            color: white;
-            text-align: center;
-        }
-        .server-btn:hover {
-            border-color: #ffcc00;
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.2);
-        }
-        .server-btn .s-icon { font-size: 28px; }
-        .server-btn .s-name { font-weight: bold; color: #ffcc00; margin-top: 5px; }
-        .server-btn .s-desc { font-size: 11px; color: #aaa; margin-top: 2px; }
-
-        @media (max-width: 700px) {
-            body { flex-direction: column; align-items: center; }
-            .sidebar { width: 100%; min-height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; position: relative; top: 0; }
-            .sidebar .logo-text { display: none; }
-            .nav-btn { width: auto; min-height: 40px; flex-direction: row; gap: 6px; }
-            .main-content { max-width: 100%; }
-            .giftcode-input-group { flex-direction: column; }
-            .server-gate { grid-template-columns: 1fr; }
-        }
-    </style>
+    <title>Mini RPG - Pixel Adventure</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo-text">👑<br>VƯƠNG<br>QUỐC<br>GOLD</div>
-        <a href="index.html" class="nav-btn active"><span class="icon">🏠</span><span class="label">Trang chủ</span></a>
-        <a href="game.html" class="nav-btn"><span class="icon">👑</span><span class="label">Server 1</span></a>
-        <a href="game2.html" class="nav-btn"><span class="icon">✊</span><span class="label">Server 2</span></a>
-        <a href="game3.html" class="nav-btn"><span class="icon">🎨</span><span class="label">Server 3</span></a>
-        <a href="game4.html" class="nav-btn"><span class="icon">⚔️</span><span class="label">Server 4</span></a>
-        <a href="chat.html" class="nav-btn"><span class="icon">💬</span><span class="label">Chat</span></a>
-        <a href="nap.html" class="nav-btn"><span class="icon">💳</span><span class="label">Nạp tiền</span></a>
-        <a href="doithuong.html" class="nav-btn"><span class="icon">🎁</span><span class="label">Đổi thưởng</span></a>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-
-        <div class="main-card">
-            <div class="title">👑 VƯƠNG QUỐC GOLD</div>
-
-            <!-- User Info -->
-            <div id="userInfoBox">
-                <div>
-                    <div>👤 <b id="displayUsername" style="color: #00b894;">-</b></div>
-                    <div class="gold-display">💰 <span id="userGold">0</span> GOLD</div>
-                </div>
-                <button class="btn-logout" onclick="userLogout()">Đăng xuất</button>
+    <!-- Main Menu -->
+    <div id="mainMenu" class="menu-overlay">
+        <div class="menu-container">
+            <h1 class="game-title">⚔️ MINI RPG</h1>
+            <div class="menu-buttons">
+                <button id="newGameBtn" class="menu-btn">🆕 NEW GAME</button>
+                <button id="continueBtn" class="menu-btn" disabled>📂 CONTINUE</button>
+                <button id="settingsBtn" class="menu-btn">⚙️ SETTINGS</button>
+                <button id="resetDataBtn" class="menu-btn danger">🗑️ RESET DATA</button>
             </div>
-
-            <!-- Login/Register -->
-            <div id="authBox">
-                <div class="auth-tabs">
-                    <button class="tab-btn active" id="tabLoginBtn" onclick="switchTab('login')">Đăng Nhập</button>
-                    <button class="tab-btn" id="tabRegisterBtn" onclick="switchTab('register')">Đăng Ký</button>
-                </div>
-
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label>Tên tài khoản</label>
-                        <input type="text" id="loginUser" required placeholder="Nhập tài khoản...">
-                    </div>
-                    <div class="form-group">
-                        <label>Mật khẩu</label>
-                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu...">
-                    </div>
-                    <button class="btn-submit" type="submit">🔑 ĐĂNG NHẬP</button>
-                </form>
-
-                <form id="registerForm" onsubmit="handleRegister(event)" style="display: none;">
-                    <div class="form-group">
-                        <label>Tên tài khoản mới</label>
-                        <input type="text" id="regUser" required placeholder="Chọn tài khoản...">
-                    </div>
-                    <div class="form-group">
-                        <label>Mật khẩu</label>
-                        <input type="password" id="regPass" required placeholder="Tạo mật khẩu...">
-                    </div>
-                    <button class="btn-submit" type="submit" style="background: #00b894;">✅ ĐĂNG KÝ</button>
-                </form>
-            </div>
-
-            <!-- BẢNG THÔNG BÁO SỰ KIỆN -->
-            <div class="event-board">
-                <h4>📢 TIN TỨC & SỰ KIỆN MỚI NHẤT</h4>
-                <ul>
-                    <li><span class="new">MỚI</span> Sự kiện "Vua Săn Gold" diễn ra từ 01/08 - 10/08. Nhận ngay 5,000 Gold khi nạp lần đầu!</li>
-                    <li><span class="new">HOT</span> Quà tặng Giftcode: Nhập code <b style="color: #ffcc00;">VIP1</b> để nhận 10,000 Gold tại ô Giftcode bên dưới!</li>
-                    <li>Cập nhật tính năng Đổi Thưởng qua Ngân hàng và Thẻ cào.</li>
-                    <li>Bảo trì hệ thống định kỳ vào 2:00 AM hàng ngày (Thời gian 5 phút).</li>
-                </ul>
-            </div>
-
-            <!-- Ô NHẬP GIFCODE -->
-            <div class="giftcode-area">
-                <div style="font-weight: bold; color: #ffcc00;">🎁 NHẬN QUÀ TỪ GIFCODE</div>
-                <div class="giftcode-input-group">
-                    <input type="text" id="giftcodeInput" placeholder="Nhập mã Giftcode tại đây (VD: VIP1)" maxlength="20">
-                    <button onclick="redeemGiftcode()">NHẬN</button>
-                </div>
-                <div id="giftcodeStatus" style="font-size: 13px; min-height: 20px; color: #aaa;">Nhập mã và bấm Nhận để cộng Gold</div>
-            </div>
-
-            <!-- 👇 KHU VỰC CHỌN MÁY CHỦ GAME MỚI -->
-            <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                <h3 style="color: #ffcc00; margin-bottom: 15px;">🚀 CỔNG KẾT NỐI VÀO GAME</h3>
-                <div class="server-gate">
-                    <a href="game.html" class="server-btn">
-                        <div class="s-icon">👑</div>
-                        <div class="s-name">Máy chủ 1</div>
-                        <div class="s-desc">Ai Là Vua? (Quiz)</div>
-                    </a>
-                    <a href="game2.html" class="server-btn">
-                        <div class="s-icon">✊</div>
-                        <div class="s-name">Máy chủ 2</div>
-                        <div class="s-desc">Kéo Búa Bao (Cược Gold)</div>
-                    </a>
-                    <a href="game3.html" class="server-btn">
-                        <div class="s-icon">🎨</div>
-                        <div class="s-name">Máy chủ 3</div>
-                        <div class="s-desc">Bạn Vẽ Tôi Đoán</div>
-                    </a>
-                    <a href="game4.html" class="server-btn">
-                        <div class="s-icon">⚔️</div>
-                        <div class="s-name">Máy chủ 4</div>
-                        <div class="s-desc">MMORPG 2D (Đang xây dựng)</div>
-                    </a>
-                </div>
-            </div>
-
+            <div class="menu-version">v1.0.0</div>
         </div>
     </div>
 
-    <script>
-        // Cấu hình Firebase (Giữ nguyên)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDYXPAXWGWNoP1f6R23Vjgn4bqghst7bhs",
-            authDomain: "lang-la-tqb.firebaseapp.com",
-            databaseURL: "https://lang-la-tqb-default-rtdb.firebaseio.com",
-            projectId: "lang-la-tqb",
-            storageBucket: "lang-la-tqb.firebasestorage.app",
-            messagingSenderId: "32586764344",
-            appId: "1:32586764344:web:fe15cfb7ee8a1df98d16cd"
-        };
+    <!-- Character Creation -->
+    <div id="characterCreation" class="menu-overlay" style="display:none;">
+        <div class="creation-container">
+            <h2>TẠO NHÂN VẬT</h2>
+            <div class="creation-form">
+                <div class="form-group">
+                    <label>Tên nhân vật:</label>
+                    <input type="text" id="playerName" value="Hero" maxlength="12">
+                </div>
+                <div class="form-group">
+                    <label>Giới tính:</label>
+                    <div class="gender-select">
+                        <button class="gender-btn active" data-gender="male">🧑 Nam</button>
+                        <button class="gender-btn" data-gender="female">👩 Nữ</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Màu tóc:</label>
+                    <div class="color-select">
+                        <button class="color-btn active" style="background:#8B6914;" data-hair="brown"></button>
+                        <button class="color-btn" style="background:#1a1a1a;" data-hair="black"></button>
+                        <button class="color-btn" style="background:#FFD700;" data-hair="blonde"></button>
+                        <button class="color-btn" style="background:#FF4500;" data-hair="red"></button>
+                        <button class="color-btn" style="background:#C0C0C0;" data-hair="white"></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Trang phục:</label>
+                    <div class="outfit-select">
+                        <button class="outfit-btn active" data-outfit="adventurer">🗡️ Nhà thám hiểm</button>
+                        <button class="outfit-btn" data-outfit="knight">🛡️ Hiệp sĩ</button>
+                        <button class="outfit-btn" data-outfit="mage">🔮 Pháp sư</button>
+                        <button class="outfit-btn" data-outfit="rogue">🗡️ Sát thủ</button>
+                    </div>
+                </div>
+                <button id="startGameBtn" class="menu-btn primary">BẮT ĐẦU HÀNH TRÌNH 🚀</button>
+            </div>
+        </div>
+    </div>
 
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <!-- Game Container -->
+    <div id="gameContainer" style="display:none;">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud" class="hud">
+            <div class="hud-top">
+                <div class="hud-left">
+                    <div class="player-name" id="hudName">Player</div>
+                    <div class="player-level">LV <span id="hudLevel">1</span></div>
+                </div>
+                <div class="hud-right">
+                    <div class="gold-display">🪙 <span id="hudGold">0</span></div>
+                </div>
+            </div>
+            <div class="hud-bars">
+                <div class="stat-bar">
+                    <span class="stat-label">❤️ HP</span>
+                    <div class="bar-bg">
+                        <div class="bar-fill hp-bar" id="hpBar" style="width:100%"></div>
+                    </div>
+                    <span class="stat-text" id="hpText">100/100</span>
+                </div>
+                <div class="stat-bar">
+                    <span class="stat-label">💧 MP</span>
+                    <div class="bar-bg">
+                        <div class="bar-fill mp-bar" id="mpBar" style="width:100%"></div>
+                    </div>
+                    <span class="stat-text" id="mpText">50/50</span>
+                </div>
+                <div class="stat-bar">
+                    <span class="stat-label">⭐ EXP</span>
+                    <div class="bar-bg">
+                        <div class="bar-fill exp-bar" id="expBar" style="width:0%"></div>
+                    </div>
+                    <span class="stat-text" id="expText">0/100</span>
+                </div>
+            </div>
+        </div>
 
-        function getUsers() { return JSON.parse(localStorage.getItem("app_users") || "{}"); }
-        function saveUsers(users) { localStorage.setItem("app_users", JSON.stringify(users)); }
+        <!-- Skill Bar -->
+        <div id="skillBar" class="skill-bar">
+            <button class="skill-btn" data-skill="0">[1] ⚔️ Tấn công</button>
+            <button class="skill-btn" data-skill="1">[2] 🔥 Fireball</button>
+            <button class="skill-btn" data-skill="2">[3] ⚡ Lightning</button>
+            <button class="skill-btn" data-skill="3">[4] 🛡️ Shield</button>
+        </div>
 
-        function switchTab(type) {
-            document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
-            document.getElementById('registerForm').style.display = type === 'register' ? 'block' : 'none';
-            document.getElementById('tabLoginBtn').classList.toggle('active', type === 'login');
-            document.getElementById('tabRegisterBtn').classList.toggle('active', type === 'register');
-        }
+        <!-- Interaction Hint -->
+        <div id="interactionHint" class="interaction-hint" style="display:none;">
+            Nhấn <kbd>E</kbd> để tương tác
+        </div>
 
-        function handleRegister(e) {
-            e.preventDefault();
-            let u = document.getElementById('regUser').value.trim();
-            let p = document.getElementById('regPass').value.trim();
-            if (u.length < 3 || p.length < 6) return alert("Tài khoản tối thiểu 3 ký tự, mật khẩu 6 ký tự!");
-            let users = getUsers();
-            if (users[u]) return alert("Tài khoản đã tồn tại!");
-            users[u] = { password: p, gold: 100, score: 0 };
-            saveUsers(users);
-            localStorage.setItem("currentUser", u);
-            alert("Đăng ký thành công! Nhận 100 Gold.");
-            checkAuth();
-        }
+        <!-- UI Overlays -->
+        <div id="inventoryUI" class="ui-overlay" style="display:none;">
+            <div class="ui-container">
+                <h2>🎒 TÚI ĐỒ</h2>
+                <div class="inventory-grid" id="inventoryGrid"></div>
+                <div class="inventory-info" id="inventoryInfo">Chọn một vật phẩm để xem thông tin</div>
+                <button class="close-ui-btn" onclick="closeInventory()">Đóng [I]</button>
+            </div>
+        </div>
 
-        function handleLogin(e) {
-            e.preventDefault();
-            let u = document.getElementById('loginUser').value.trim();
-            let p = document.getElementById('loginPass').value.trim();
-            let users = getUsers();
-            if (!users[u] || users[u].password !== p) return alert("Sai tài khoản hoặc mật khẩu!");
-            localStorage.setItem("currentUser", u);
-            checkAuth();
-        }
+        <div id="shopUI" class="ui-overlay" style="display:none;">
+            <div class="ui-container">
+                <h2>🏪 CỬA HÀNG</h2>
+                <div class="shop-tabs">
+                    <button class="shop-tab active" data-tab="buy">🛒 Mua</button>
+                    <button class="shop-tab" data-tab="sell">💰 Bán</button>
+                </div>
+                <div class="shop-items" id="shopItems"></div>
+                <div class="shop-info">🪙 <span id="shopGold">0</span></div>
+                <button class="close-ui-btn" onclick="closeShop()">Đóng</button>
+            </div>
+        </div>
 
-        function checkAuth() {
-            let currentUser = localStorage.getItem("currentUser") || "";
-            let users = getUsers();
+        <div id="questUI" class="ui-overlay" style="display:none;">
+            <div class="ui-container">
+                <h2>📜 NHIỆM VỤ</h2>
+                <div id="questList"></div>
+                <button class="close-ui-btn" onclick="closeQuest()">Đóng</button>
+            </div>
+        </div>
 
-            if (currentUser && users[currentUser]) {
-                document.getElementById("authBox").style.display = "none";
-                document.getElementById("userInfoBox").style.display = "flex";
-                document.getElementById("displayUsername").innerText = currentUser;
-                document.getElementById("userGold").innerText = (users[currentUser].gold || 0).toLocaleString('vi-VN');
-                listenToGoldFromAdmin(currentUser);
-            } else {
-                document.getElementById("authBox").style.display = "block";
-                document.getElementById("userInfoBox").style.display = "none";
-            }
-        }
+        <div id="dialogueUI" class="ui-overlay" style="display:none;">
+            <div class="dialogue-container">
+                <div class="dialogue-portrait" id="dialoguePortrait">🧙</div>
+                <div class="dialogue-text" id="dialogueText">Hello!</div>
+                <div class="dialogue-options" id="dialogueOptions"></div>
+                <button class="close-ui-btn" onclick="closeDialogue()">Đóng</button>
+            </div>
+        </div>
 
-        function userLogout() {
-            if (confirm("Đăng xuất?")) {
-                localStorage.removeItem("currentUser");
-                checkAuth();
-            }
-        }
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="menu-overlay" style="display:none;">
+            <div class="menu-container">
+                <h2>⏸️ TẠM DỪNG</h2>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="resumeGame()">▶️ Tiếp tục</button>
+                    <button class="menu-btn" onclick="saveGame()">💾 Lưu game</button>
+                    <button class="menu-btn" onclick="showSettings()">⚙️ Cài đặt</button>
+                    <button class="menu-btn danger" onclick="quitToMenu()">🚪 Thoát</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function listenToGoldFromAdmin(username) {
-            if (!username) return;
-            db.ref('users/' + username + '/gold').on('value', (snapshot) => {
-                let serverGold = snapshot.val();
-                let users = getUsers();
-                if (serverGold !== null && users[username]) {
-                    users[username].gold = serverGold;
-                    saveUsers(users);
-                    document.getElementById("userGold").innerText = serverGold.toLocaleString('vi-VN');
-                }
-            });
-        }
+    <!-- Notification -->
+    <div id="notification" class="notification" style="display:none;"></div>
 
-        // ================= XỬ LÝ NHẬP GIFCODE =================
-        function redeemGiftcode() {
-            let codeInput = document.getElementById('giftcodeInput').value.trim().toUpperCase();
-            let statusEl = document.getElementById('giftcodeStatus');
-            let currentUser = localStorage.getItem("currentUser");
-            let users = getUsers();
-
-            if (!currentUser || !users[currentUser]) {
-                statusEl.style.color = "#ff6b6b";
-                statusEl.innerText = "❌ Vui lòng đăng nhập để nhận quà!";
-                return;
-            }
-
-            if (!codeInput || codeInput.length < 3) {
-                statusEl.style.color = "#ff6b6b";
-                statusEl.innerText = "❌ Mã Giftcode không hợp lệ!";
-                return;
-            }
-
-            statusEl.style.color = "#ffcc00";
-            statusEl.innerText = "⏳ Đang kiểm tra mã...";
-
-            db.ref('giftcodes/' + codeInput).once('value').then(snapshot => {
-                if (!snapshot.exists()) {
-                    statusEl.style.color = "#ff6b6b";
-                    statusEl.innerText = "❌ Mã Giftcode không tồn tại hoặc đã hết hạn!";
-                    return;
-                }
-
-                let codeData = snapshot.val();
-                
-                if (codeData.limit !== 0 && codeData.used >= codeData.limit) {
-                    statusEl.style.color = "#ff6b6b";
-                    statusEl.innerText = "❌ Mã Giftcode này đã hết lượt sử dụng!";
-                    return;
-                }
-
-                let bonusGold = codeData.gold || 0;
-                users[currentUser].gold = (users[currentUser].gold || 0) + bonusGold;
-                saveUsers(users);
-
-                db.ref('giftcodes/' + codeInput + '/used').set(codeData.used + 1);
-                db.ref('users/' + currentUser + '/gold').set(users[currentUser].gold);
-
-                statusEl.style.color = "#2ecc71";
-                statusEl.innerText = `🎉 Chúc mừng! Bạn đã nhận được ${bonusGold.toLocaleString('vi-VN')} GOLD từ mã ${codeInput}!`;
-                document.getElementById("userGold").innerText = users[currentUser].gold.toLocaleString('vi-VN');
-                document.getElementById('giftcodeInput').value = '';
-
-            }).catch(err => {
-                statusEl.style.color = "#ff6b6b";
-                statusEl.innerText = "❌ Lỗi kết nối hệ thống: " + err.message;
-            });
-        }
-
-        checkAuth();
-    </script>
+    <script src="js/game.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/skills.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/leaderboard.js"></script>
+    <!-- Thêm vào cuối body, sau các script khác -->
+    <script src="js/shop.js"></script>
+    <script src="js/skills.js"></script>
+    <script src="js/save.js"></script>
+    <script src="js/leaderboard.js"></script>
 </body>
 </html>
