@@ -1,0 +1,52 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "title": "🧩 CÂU ĐỐ HACK NÃO",
+      "difficulty": 4,
+      "difficultyText": "● Rất khó",
+      "reward": 500,
+      "time": "02:45",
+      "hints": [
+        "Vua không nói dối.",
+        "Chỉ 1 người nói thật.",
+        "Vua không ở giữa."
+      ],
+      "statements": {
+        "A": "Ta không phải là vua.",
+        "B": "Vua đang đứng bên trái ta.",
+        "C": "Cả A và C đều nói dối.",
+        "D": "Ta không đứng bên phải vua."
+      },
+      "correctAnswer": "B",
+      "story": "Giải câu đố hack não để tìm ra vị vua thật sự!\nChỉ 1 người nói thật. Ai là Vua?",
+      "createdBy": "admin",
+      "createdAt": "2026-08-11",
+      "active": true
+    },
+    {
+      "id": 2,
+      "title": "🧩 CÂU ĐỐ TRIẾT HỌC",
+      "difficulty": 3,
+      "difficultyText": "● Khó",
+      "reward": 300,
+      "time": "02:00",
+      "hints": [
+        "Có 3 người nói dối.",
+        "Người thứ 2 luôn nói thật.",
+        "Đáp án không phải D."
+      ],
+      "statements": {
+        "A": "Tôi là vua.",
+        "B": "A nói dối.",
+        "C": "B nói thật.",
+        "D": "Tôi không là vua."
+      },
+      "correctAnswer": "C",
+      "story": "Tìm ra vị vua thật sự trong 4 người!\nChỉ 1 người nói thật.",
+      "createdBy": "admin",
+      "createdAt": "2026-08-11",
+      "active": true
+    }
+  ]
+}

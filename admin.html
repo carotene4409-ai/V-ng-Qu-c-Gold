@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Vương Quốc Gold</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0b12;
+            --bg-secondary: #111422;
+            --bg-card: #151a2b;
+            --border-gold: #ffd700;
+            --text-gold: #ffd700;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8899bb;
+            --radius: 12px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ===== LOGIN FORM ===== */
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+            background: var(--bg-card);
+            border: 2px solid rgba(255,215,0,0.2);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+        }
+        .login-container h1 {
+            color: var(--text-gold);
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .login-container p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .login-container .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .login-container .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .login-container .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .login-container .form-group input:focus {
+            border-color: var(--text-gold);
+            outline: none;
+        }
+        .login-container .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffd700, #f57c00);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .login-container .btn-login:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+        }
+        .login-container .btn-login:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .login-container .error {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 12px;
+            display: none;
+        }
+        .login-container .error.show { display: block; }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            display: none;
+        }
+        .admin-panel.show { display: block; }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,215,0,0.1);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .admin-header h1 {
+            font-size: 24px;
+            color: var(--text-gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .admin-header .back-btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-gold);
+            transition: 0.3s;
+        }
+        .admin-header .back-btn:hover {
+            background: rgba(255,215,0,0.1);
+            color: var(--text-gold);
+        }
+        .admin-header .logout-btn {
+            background: #d63031;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .admin-header .logout-btn:hover { background: #c0392b; }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,215,0,0.1);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            text-align: center;
+        }
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-gold);
+        }
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Add Form */
+        .add-form {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,215,0,0.1);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-top: 24px;
+        }
+        .add-form h2 {
+            color: var(--text-gold);
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--text-gold);
+            outline: none;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-full { grid-column: 1 / -1; }
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .btn-submit {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #ffd700, #f57c00);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+        }
+        .btn-outline {
+            padding: 12px 32px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .btn-outline:hover {
+            border-color: var(--text-gold);
+            color: #fff;
+        }
+        .btn-danger {
+            padding: 6px 16px;
+            background: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .btn-danger:hover { background: #c62828; }
+        .btn-toggle {
+            padding: 6px 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .btn-toggle:hover {
+            border-color: var(--text-gold);
+            color: #fff;
+        }
+        .btn-toggle.active {
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        /* Question List */
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .question-item {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,215,0,0.1);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: 0.3s;
+        }
+        .question-item:hover { border-color: var(--text-gold); }
+        .question-item .info { flex: 1; min-width: 200px; }
+        .question-item .info .title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .question-item .info .meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .question-item .info .meta span {
+            margin-right: 16px;
+        }
+        .question-item .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-inactive {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--text-gold);
+            border-radius: var(--radius);
+            padding: 16px 24px;
+            color: #fff;
+            font-weight: 600;
+            z-index: 999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: 0.4s;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            max-width: 90%;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.success { border-color: #4caf50; }
+        .toast.error { border-color: #f44336; }
+        .toast.warning { border-color: #ff9800; }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        .loading i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 12px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .admin-header h1 { font-size: 20px; }
+            .question-item { flex-direction: column; align-items: stretch; }
+            .question-item .actions { justify-content: flex-end; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .login-container { margin: 40px 16px; padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- ===== LOGIN ===== -->
+        <div class="login-container" id="loginContainer">
+            <h1>👑 VƯƠNG QUỐC GOLD</h1>
+            <p>🔐 Admin Panel - Đăng nhập để quản lý</p>
+
+            <div class="form-group">
+                <label>Tên đăng nhập</label>
+                <input type="text" id="adminUser" placeholder="Nhập tên đăng nhập..." />
+            </div>
+            <div class="form-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="adminPass" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') adminLogin()" />
+            </div>
+
+            <button class="btn-login" id="btnLogin" onclick="adminLogin()">
+                <i class="fas fa-lock"></i> ĐĂNG NHẬP ADMIN
+            </button>
+
+            <div class="error" id="loginError">❌ Sai tên đăng nhập hoặc mật khẩu!</div>
+        </div>
+
+        <!-- ===== ADMIN PANEL ===== -->
+        <div class="admin-panel" id="adminPanel">
+
+            <!-- Header -->
+            <div class="admin-header">
+                <h1><i class="fas fa-crown"></i> Admin - Vương Quốc Gold</h1>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Về trang chủ</a>
+                    <button class="logout-btn" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="number" id="totalQuestions">0</div>
+                    <div class="label">📝 Tổng câu hỏi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="activeQuestions">0</div>
+                    <div class="label">✅ Đang hoạt động</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="inactiveQuestions">0</div>
+                    <div class="label">⏸️ Đã tạm dừng</div>
+                </div>
+            </div>
+
+            <!-- Add Question Form -->
+            <div class="add-form">
+                <h2><i class="fas fa-plus-circle"></i> Thêm câu hỏi mới</h2>
+                <form id="questionForm" onsubmit="addQuestion(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>📝 Tiêu đề</label>
+                            <input type="text" id="qTitle" placeholder="VD: 🧩 CÂU ĐỐ HACK NÃO" required>
+                        </div>
+                        <div class="form-group">
+                            <label>🎯 Đáp án đúng</label>
+                            <select id="qCorrect" required>
+                                <option value="A">A</option>
+                                <option value="B" selected>B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>⭐ Độ khó (1-5)</label>
+                            <input type="number" id="qDifficulty" value="4" min="1" max="5" required>
+                        </div>
+                        <div class="form-group">
+                            <label>💰 Phần thưởng (Gold)</label>
+                            <input type="number" id="qReward" value="500" min="100" step="100" required>
+                        </div>
+                        <div class="form-group form-full">
+                            <label>📖 Nội dung câu đố</label>
+                            <textarea id="qStory" rows="2" placeholder="Giải câu đố hack não để tìm ra vị vua thật sự!&#10;Chỉ 1 người nói thật. Ai là Vua?" required></textarea>
+                        </div>
+                        <div class="form-group form-full">
+                            <label>💡 Gợi ý (mỗi gợi ý 1 dòng)</label>
+                            <textarea id="qHints" rows="3" placeholder="Vua không nói dối.&#10;Chỉ 1 người nói thật.&#10;Vua không ở giữa." required></textarea>
+                        </div>
+                        <div class="form-group form-full">
+                            <label>🗣️ Lời thoại nhân vật</label>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                <input type="text" id="qStmtA" placeholder="A: ..." value="Ta không phải là vua." required>
+                                <input type="text" id="qStmtB" placeholder="B: ..." value="Vua đang đứng bên trái ta." required>
+                                <input type="text" id="qStmtC" placeholder="C: ..." value="Cả A và C đều nói dối." required>
+                                <input type="text" id="qStmtD" placeholder="D: ..." value="Ta không đứng bên phải vua." required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit"><i class="fas fa-save"></i> LƯU CÂU HỎI</button>
+                            <button type="reset" class="btn-outline">Xóa form</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Question List -->
+            <div style="margin-top: 24px;">
+                <h2 style="color:var(--text-gold);margin-bottom:16px;">
+                    <i class="fas fa-list"></i> Danh sách câu hỏi
+                </h2>
+                <div id="questionList">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        Đang tải...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // ADMIN PANEL - Vương Quốc Gold
+        // ============================================
+
+        // ===== CẤU HÌNH =====
+        // ⭐ QUAN TRỌNG: Thay URL bằng URL backend của bạn trên Render
+        const API_BASE = 'https://vqg-backend.onrender.com/api';
+        // Nếu chạy local: const API_BASE = 'http://localhost:5000/api';
+
+        let adminToken = null;
+
+        // ===== TOAST =====
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===== ADMIN LOGIN =====
+        async function adminLogin() {
+            const username = document.getElementById('adminUser').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
+            const btn = document.getElementById('btnLogin');
+            const errorEl = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorEl.textContent = '⚠️ Vui lòng nhập tên và mật khẩu!';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            errorEl.classList.remove('show');
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Đăng nhập thất bại!');
+                }
+
+                adminToken = data.token;
+                localStorage.setItem('admin_token', adminToken);
+
+                showToast('✅ ' + data.message, 'success');
+                showAdminPanel();
+
+            } catch (err) {
+                errorEl.textContent = '❌ ' + err.message;
+                errorEl.classList.add('show');
+                showToast(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-lock"></i> ĐĂNG NHẬP ADMIN';
+            }
+        }
+
+        // ===== SHOW/HIDE PANEL =====
+        function showAdminPanel() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('show');
+            loadQuestions();
+            loadStats();
+        }
+
+        function adminLogout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                adminToken = null;
+                localStorage.removeItem('admin_token');
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('adminPanel').classList.remove('show');
+                showToast('👋 Đã đăng xuất!', 'warning');
+            }
+        }
+
+        // ===== KIỂM TRA TOKEN =====
+        function getToken() {
+            if (adminToken) return adminToken;
+            const saved = localStorage.getItem('admin_token');
+            if (saved) adminToken = saved;
+            return adminToken;
+        }
+
+        // ===== API CALL =====
+        async function adminFetch(url, options = {}) {
+            const token = getToken();
+            if (!token) throw new Error('Chưa đăng nhập admin!');
+
+            const res = await fetch(`${API_BASE}${url}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-admin-token': token,
+                    ...(options.headers || {})
+                }
+            });
+
+            const data = await res.json();
+
+            if (res.status === 401 || res.status === 403) {
+                // Token hết hạn
+                adminToken = null;
+                localStorage.removeItem('admin_token');
+                showToast('⏰ Phiên đăng nhập đã hết hạn!', 'error');
+                setTimeout(() => {
+                    document.getElementById('loginContainer').style.display = 'block';
+                    document.getElementById('adminPanel').classList.remove('show');
+                }, 1000);
+                throw new Error('Unauthorized');
+            }
+
+            if (!res.ok) {
+                throw new Error(data.message || 'Lỗi API!');
+            }
+
+            return data;
+        }
+
+        // ===== LOAD QUESTIONS =====
+        async function loadQuestions() {
+            const container = document.getElementById('questionList');
+
+            try {
+                const data = await adminFetch('/admin/questions');
+                const questions = data.questions || [];
+
+                if (questions.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:40px;color:var(--text-secondary);">
+                            <i class="fas fa-inbox" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+                            Chưa có câu hỏi nào. Hãy thêm câu hỏi mới!
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = questions.map(q => `
+                    <div class="question-item">
+                        <div class="info">
+                            <div class="title">${q.title}</div>
+                            <div class="meta">
+                                <span>⭐ ${'●'.repeat(q.difficulty)}${'○'.repeat(5 - q.difficulty)}</span>
+                                <span>💰 ${q.reward.toLocaleString('vi-VN')} GOLD</span>
+                                <span>🎯 Đáp án: ${q.correctAnswer}</span>
+                                <span>📅 ${q.createdAt || 'N/A'}</span>
+                                <span class="${q.active ? 'badge-active' : 'badge-inactive'}">
+                                    ${q.active ? '✅ Hoạt động' : '⏸️ Tạm dừng'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-toggle ${q.active ? 'active' : ''}" onclick="toggleQuestion(${q.id})">
+                                ${q.active ? '⏸️ Tạm dừng' : '▶️ Kích hoạt'}
+                            </button>
+                            <button class="btn-danger" onclick="deleteQuestion(${q.id})">
+                                <i class="fas fa-trash"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:40px;color:var(--text-secondary);">
+                            <i class="fas fa-exclamation-triangle" style="font-size:40px;display:block;margin-bottom:12px;color:#f44336;"></i>
+                            Lỗi tải câu hỏi: ${err.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // ===== LOAD STATS =====
+        async function loadStats() {
+            try {
+                const data = await adminFetch('/admin/stats');
+                const stats = data.stats || {};
+
+                document.getElementById('totalQuestions').textContent = stats.total || 0;
+                document.getElementById('activeQuestions').textContent = stats.active || 0;
+                document.getElementById('inactiveQuestions').textContent = stats.inactive || 0;
+
+            } catch (err) {
+                // Stats không quan trọng, bỏ qua lỗi
+            }
+        }
+
+        // ===== ADD QUESTION =====
+        async function addQuestion(e) {
+            e.preventDefault();
+
+            const data = {
+                title: document.getElementById('qTitle').value.trim(),
+                difficulty: document.getElementById('qDifficulty').value,
+                reward: document.getElementById('qReward').value,
+                story: document.getElementById('qStory').value.trim(),
+                hints: document.getElementById('qHints').value.trim(),
+                statements: {
+                    A: document.getElementById('qStmtA').value.trim(),
+                    B: document.getElementById('qStmtB').value.trim(),
+                    C: document.getElementById('qStmtC').value.trim(),
+                    D: document.getElementById('qStmtD').value.trim()
+                },
+                correctAnswer: document.getElementById('qCorrect').value
+            };
+
+            if (!data.title || !data.story || !data.hints) {
+                showToast('⚠️ Vui lòng điền đầy đủ thông tin!', 'warning');
+                return;
+            }
+
+            try {
+                const result = await adminFetch('/admin/questions', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+
+                showToast('✅ ' + result.message, 'success');
+                document.getElementById('questionForm').reset();
+                loadQuestions();
+                loadStats();
+
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    showToast('❌ ' + err.message, 'error');
+                }
+            }
+        }
+
+        // ===== TOGGLE QUESTION =====
+        async function toggleQuestion(id) {
+            try {
+                const result = await adminFetch(`/admin/questions/${id}/toggle`, {
+                    method: 'PATCH'
+                });
+                showToast(result.message, 'success');
+                loadQuestions();
+                loadStats();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    showToast('❌ ' + err.message, 'error');
+                }
+            }
+        }
+
+        // ===== DELETE QUESTION =====
+        async function deleteQuestion(id) {
+            if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) return;
+
+            try {
+                const result = await adminFetch(`/admin/questions/${id}`, {
+                    method: 'DELETE'
+                });
+                showToast('🗑️ ' + result.message, 'success');
+                loadQuestions();
+                loadStats();
+            } catch (err) {
+                if (err.message !== 'Unauthorized') {
+                    showToast('❌ ' + err.message, 'error');
+                }
+            }
+        }
+
+        // ===== CHECK SAVED TOKEN =====
+        function checkSavedToken() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                adminToken = token;
+                // Thử load data để kiểm tra token còn hiệu lực
+                adminFetch('/admin/stats')
+                    .then(() => {
+                        showAdminPanel();
+                    })
+                    .catch(() => {
+                        // Token hết hạn, xóa
+                        localStorage.removeItem('admin_token');
+                        adminToken = null;
+                    });
+            }
+        }
+
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSavedToken();
+
+            // Enter key for login
+            document.getElementById('adminPass').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') adminLogin();
+            });
+        });
+    </script>
+
+</body>
+</html>
