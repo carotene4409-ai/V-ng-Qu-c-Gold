@@ -1298,3 +1298,43 @@ img {
         grid-template-columns: 1fr;
     }
 }
+/* ============ AUTH MODAL ============ */
+.auth-modal .form-group {
+    margin-bottom: 14px;
+    text-align: left;
+}
+.auth-modal .form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+.auth-modal .form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+.auth-modal .form-group input:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.05);
+}
+.auth-modal #switch-auth-link {
+    color: var(--accent-gold);
+    cursor: pointer;
+    font-size: 14px;
+    transition: var(--transition);
+}
+.auth-modal #switch-auth-link:hover {
+    text-decoration: underline;
+}
+.auth-modal .btn-block {
+    margin-top: 6px;
+}

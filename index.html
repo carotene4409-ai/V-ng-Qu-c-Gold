@@ -4,13 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vương Quốc Gold - MMORPG đỉnh cao</title>
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- Google Font: Orbitron + Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <!-- CSS -->
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -39,11 +36,11 @@
             <nav class="nav-links" id="nav-links">
                 <ul>
                     <li><a href="#" class="active">Trang chủ</a></li>
-                    <li><a href="#">Giới thiệu</a></li>
-                    <li><a href="#">Hướng dẫn</a></li>
-                    <li><a href="#">BXH</a></li>
-                    <li><a href="#">Sự kiện</a></li>
-                    <li><a href="#">Tin tức</a></li>
+                    <li><a href="#about">Giới thiệu</a></li>
+                    <li><a href="#servers">Máy chủ</a></li>
+                    <li><a href="#leaderboard">BXH</a></li>
+                    <li><a href="#events">Sự kiện</a></li>
+                    <li><a href="#news">Tin tức</a></li>
                 </ul>
             </nav>
 
@@ -58,7 +55,7 @@
                 <!-- Gold -->
                 <div class="gold-display" id="gold-display">
                     <i class="fas fa-coins gold-icon"></i>
-                    <span class="gold-amount">25</span>
+                    <span class="gold-amount" id="header-gold">0</span>
                     <span class="gold-label">GOLD</span>
                     <i class="fas fa-chevron-down gold-arrow"></i>
                 </div>
@@ -66,11 +63,10 @@
                 <!-- User / Auth -->
                 <div class="user-area" id="user-area">
                     <!-- Đã đăng nhập -->
-                    <div class="user-loggedin" id="user-loggedin">
+                    <div class="user-loggedin" id="user-loggedin" style="display:none;">
                         <img src="https://i.pravatar.cc/40?img=12" alt="Avatar" class="avatar" id="user-avatar" />
-                        <span class="username">Nhà Vua</span>
+                        <span class="username" id="header-username">Nhà Vua</span>
                         <i class="fas fa-chevron-down user-arrow"></i>
-                        <!-- Dropdown -->
                         <div class="user-dropdown" id="user-dropdown">
                             <a href="#"><i class="fas fa-user"></i> Hồ sơ</a>
                             <a href="#"><i class="fas fa-sword"></i> Trang bị</a>
@@ -82,10 +78,10 @@
                             <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                         </div>
                     </div>
-                    <!-- Chưa đăng nhập (ẩn) -->
-                    <div class="user-login" id="user-login" style="display: none;">
-                        <button class="btn btn-outline btn-sm">Đăng nhập</button>
-                        <button class="btn btn-primary btn-sm">Đăng ký</button>
+                    <!-- Chưa đăng nhập -->
+                    <div class="user-login" id="user-login">
+                        <button class="btn btn-outline btn-sm" onclick="openAuthModal('login')">Đăng nhập</button>
+                        <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Đăng ký</button>
                     </div>
                 </div>
 
@@ -101,14 +97,55 @@
     <div class="mobile-menu" id="mobile-menu">
         <ul>
             <li><a href="#" class="active"><i class="fas fa-home"></i> Trang chủ</a></li>
-            <li><a href="#"><i class="fas fa-info-circle"></i> Giới thiệu</a></li>
-            <li><a href="#"><i class="fas fa-book"></i> Hướng dẫn</a></li>
-            <li><a href="#"><i class="fas fa-trophy"></i> BXH</a></li>
-            <li><a href="#"><i class="fas fa-calendar-alt"></i> Sự kiện</a></li>
-            <li><a href="#"><i class="fas fa-newspaper"></i> Tin tức</a></li>
-            <li><a href="#"><i class="fas fa-users"></i> Cộng đồng</a></li>
+            <li><a href="#about"><i class="fas fa-info-circle"></i> Giới thiệu</a></li>
+            <li><a href="#servers"><i class="fas fa-server"></i> Máy chủ</a></li>
+            <li><a href="#leaderboard"><i class="fas fa-trophy"></i> BXH</a></li>
+            <li><a href="#events"><i class="fas fa-calendar-alt"></i> Sự kiện</a></li>
+            <li><a href="#news"><i class="fas fa-newspaper"></i> Tin tức</a></li>
+            <li><a href="#community"><i class="fas fa-users"></i> Cộng đồng</a></li>
             <li><a href="#"><i class="fas fa-headset"></i> Hỗ trợ</a></li>
         </ul>
+    </div>
+
+    <!-- ============ AUTH MODAL ============ -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal auth-modal">
+            <div class="modal-header">
+                <h3 id="auth-modal-title"><i class="fas fa-sign-in-alt"></i> ĐĂNG NHẬP</h3>
+                <button class="modal-close" id="auth-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Tên tài khoản</label>
+                        <input type="text" id="loginUser" required placeholder="Nhập tài khoản..." />
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="loginPass" required placeholder="Nhập mật khẩu..." />
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit">🔑 ĐĂNG NHẬP</button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" onsubmit="handleRegister(event)" style="display:none;">
+                    <div class="form-group">
+                        <label>Tên tài khoản mới</label>
+                        <input type="text" id="regUser" required placeholder="Chọn tài khoản (tối thiểu 3 ký tự)" />
+                    </div>
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <input type="password" id="regPass" required placeholder="Tạo mật khẩu (tối thiểu 6 ký tự)" />
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit" style="background:#00b894;">✅ ĐĂNG KÝ</button>
+                </form>
+
+                <div style="text-align:center;margin-top:12px;">
+                    <a href="#" id="switch-auth-link" onclick="switchAuthForm(event)">Chưa có tài khoản? Đăng ký ngay</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ============ GOLD MODAL ============ -->
@@ -121,7 +158,7 @@
             <div class="modal-body">
                 <div class="gold-balance">
                     <p>Số dư hiện tại</p>
-                    <h2>💰 25 GOLD</h2>
+                    <h2>💰 <span id="modal-gold">0</span> GOLD</h2>
                     <small>1 GOLD = 1.000 VNĐ</small>
                 </div>
                 <div class="gold-actions">
@@ -141,17 +178,16 @@
                 <h1>CHÀO MỪNG ĐẾN <br /><span>VƯƠNG QUỐC GOLD</span></h1>
                 <p>Xây dựng đế chế hùng mạnh, chiêu mộ anh hùng và chinh phục vương quốc trong thế giới MMORPG đỉnh cao.</p>
                 <div class="hero-buttons">
-                    <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-sword"></i> BẮT ĐẦU HÀNH TRÌNH</a>
-                    <a href="#" class="btn btn-glow btn-lg"><i class="fas fa-crown"></i> KHÁM PHÁ VƯƠNG QUỐC</a>
+                    <a href="#servers" class="btn btn-primary btn-lg"><i class="fas fa-sword"></i> BẮT ĐẦU HÀNH TRÌNH</a>
+                    <a href="#community" class="btn btn-glow btn-lg"><i class="fas fa-users"></i> THAM GIA CỘNG ĐỒNG</a>
                 </div>
             </div>
             <div class="hero-stats">
-                <div><span>10K+</span><small>Người chơi</small></div>
-                <div><span>50+</span><small>Vùng đất</small></div>
-                <div><span>100+</span><small>Anh hùng</small></div>
+                <div><span id="stat-players">10K+</span><small>Người chơi</small></div>
+                <div><span id="stat-lands">50+</span><small>Vùng đất</small></div>
+                <div><span id="stat-heroes">100+</span><small>Anh hùng</small></div>
             </div>
         </div>
-        <!-- Particles -->
         <div class="particles" id="particles"></div>
     </section>
 
@@ -176,7 +212,7 @@
         </div>
     </section>
 
-    <!-- ============ GAME SERVER ============ -->
+    <!-- ============ MÁY CHỦ ============ -->
     <section class="section game-servers" id="servers">
         <div class="container">
             <div class="section-header">
@@ -190,7 +226,7 @@
     </section>
 
     <!-- ============ BXH ============ -->
-    <section class="section leaderboard">
+    <section class="section leaderboard" id="leaderboard">
         <div class="container">
             <div class="section-header">
                 <h2><i class="fas fa-trophy" style="color: var(--accent-gold);"></i> BẢNG XẾP HẠNG</h2>
@@ -203,7 +239,7 @@
     </section>
 
     <!-- ============ SỰ KIỆN ============ -->
-    <section class="section events">
+    <section class="section events" id="events">
         <div class="container">
             <div class="section-header">
                 <h2><i class="fas fa-calendar-check" style="color: var(--accent-orange);"></i> SỰ KIỆN ĐANG DIỄN RA</h2>
@@ -216,7 +252,7 @@
     </section>
 
     <!-- ============ TIN TỨC ============ -->
-    <section class="section news">
+    <section class="section news" id="news">
         <div class="container">
             <div class="section-header">
                 <h2><i class="fas fa-newspaper" style="color: var(--accent-cyan);"></i> TIN TỨC</h2>
@@ -229,16 +265,16 @@
     </section>
 
     <!-- ============ CỘNG ĐỒNG ============ -->
-    <section class="section community">
+    <section class="section community" id="community">
         <div class="container">
             <div class="community-box">
                 <div class="community-icon"><i class="fas fa-users"></i></div>
                 <h2>THAM GIA CỘNG ĐỒNG</h2>
                 <p>Gia nhập hàng ngàn người chơi đang xây dựng đế chế của riêng mình trong Vương Quốc Gold.</p>
                 <div class="community-buttons">
-                    <a href="#" class="btn btn-primary"><i class="fas fa-user-plus"></i> THAM GIA NGAY</a>
-                    <a href="#" class="btn btn-outline"><i class="fab fa-discord"></i> DISCORD</a>
-                    <a href="#" class="btn btn-outline"><i class="fab fa-facebook"></i> FACEBOOK</a>
+                    <a href="game1.html" class="btn btn-primary"><i class="fas fa-gamepad"></i> CHƠI GAME</a>
+                    <a href="https://www.facebook.com/shopquocbao.102" target="_blank" class="btn btn-outline"><i class="fab fa-facebook"></i> FACEBOOK</a>
+                    <a href="https://zalo.me/g/o6xoyclzrms9qd7p0o86" target="_blank" class="btn btn-outline"><i class="fas fa-phone"></i> ZALO</a>
                 </div>
             </div>
         </div>
@@ -254,20 +290,20 @@
                     </div>
                     <p>Xây dựng đế chế - Chinh phục vương quốc</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-discord"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.facebook.com/shopquocbao.102" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://zalo.me/g/o6xoyclzrms9qd7p0o86" target="_blank"><i class="fas fa-phone"></i></a>
+                        <a href="https://www.youtube.com/@BaoQuocTran_2984"><i class="fab fa-youtube"></i></a>
+                        <a href="https://www.tiktok.com/@vng.quc.gold2"><i class="fab fa-tiktok"></i></a>
                     </div>
                 </div>
                 <div class="footer-links">
                     <h4>Liên kết</h4>
                     <ul>
                         <li><a href="#">Trang chủ</a></li>
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Hướng dẫn</a></li>
-                        <li><a href="#">BXH</a></li>
-                        <li><a href="#">Sự kiện</a></li>
+                        <li><a href="#about">Giới thiệu</a></li>
+                        <li><a href="#servers">Máy chủ</a></li>
+                        <li><a href="#leaderboard">BXH</a></li>
+                        <li><a href="#events">Sự kiện</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
