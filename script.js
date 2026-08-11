@@ -143,7 +143,7 @@ const serversData = [
         status: 'online',
         rating: 0,
         players: 0,
-        thumbnail: 'assets/images/logosv1.png',
+        thumbnail: 'vuongquocgold/assets/imageslogosv1.png',
         isNew: false,
         isFeatured: true,
         link: 'game1.html'  // ✅ Link đến game1.html
