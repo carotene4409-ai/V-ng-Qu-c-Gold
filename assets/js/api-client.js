@@ -149,7 +149,7 @@ const GameAPI = {
         });
     },
 
-    // === Lấy BXH ===
+    // === Lấy CTV ===
     async getLeaderboard(limit = 20) {
         return apiFetch('GET', `/leaderboard/top?limit=${limit}`, null, { auth: false });
     },

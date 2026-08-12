@@ -25,34 +25,30 @@
     <!-- ============ HEADER ============ -->
     <header id="main-header">
         <div class="container header-container">
-            <!-- Logo -->
             <div class="logo">
                 <a href="#">
                     <img src="assets/images/logo.png" alt="Vương Quốc Gold" style="height: 40px; width: auto;" />
                 </a>
             </div>
 
-            <!-- Main Navigation (Desktop) -->
             <nav class="nav-links" id="nav-links">
                 <ul>
                     <li><a href="#" class="active">Trang chủ</a></li>
                     <li><a href="#about">Giới thiệu</a></li>
                     <li><a href="#servers">Máy chủ</a></li>
-                    <li><a href="#leaderboard">BXH</a></li>
+                    <li><a href="#top-recharge">Top Nạp</a></li>
+                    <li><a href="#ctv">CTV</a></li>
                     <li><a href="#events">Sự kiện</a></li>
                     <li><a href="#news">Tin tức</a></li>
                 </ul>
             </nav>
 
-            <!-- Right: Search + Gold + User -->
             <div class="header-right">
-                <!-- Search -->
                 <div class="search-wrapper">
                     <i class="fas fa-search search-icon"></i>
                     <input type="text" id="search-input" placeholder="Tìm kiếm..." />
                 </div>
 
-                <!-- Gold -->
                 <div class="gold-display" id="gold-display">
                     <i class="fas fa-coins gold-icon"></i>
                     <span class="gold-amount" id="header-gold">0</span>
@@ -60,9 +56,7 @@
                     <i class="fas fa-chevron-down gold-arrow"></i>
                 </div>
 
-                <!-- User / Auth -->
                 <div class="user-area" id="user-area">
-                    <!-- Đã đăng nhập -->
                     <div class="user-loggedin" id="user-loggedin" style="display:none;">
                         <img src="https://i.pravatar.cc/40?img=12" alt="Avatar" class="avatar" id="user-avatar" />
                         <span class="username" id="header-username">Nhà Vua</span>
@@ -78,14 +72,12 @@
                             <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                         </div>
                     </div>
-                    <!-- Chưa đăng nhập -->
                     <div class="user-login" id="user-login">
                         <button class="btn btn-outline btn-sm" onclick="openAuthModal('login')">Đăng nhập</button>
                         <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Đăng ký</button>
                     </div>
                 </div>
 
-                <!-- Mobile Menu Toggle -->
                 <button class="mobile-toggle" id="mobile-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -99,7 +91,8 @@
             <li><a href="#" class="active"><i class="fas fa-home"></i> Trang chủ</a></li>
             <li><a href="#about"><i class="fas fa-info-circle"></i> Giới thiệu</a></li>
             <li><a href="#servers"><i class="fas fa-server"></i> Máy chủ</a></li>
-            <li><a href="#leaderboard"><i class="fas fa-trophy"></i> BXH</a></li>
+            <li><a href="#top-recharge"><i class="fas fa-coins"></i> Top Nạp</a></li>
+            <li><a href="#ctv"><i class="fas fa-users"></i> CTV</a></li>
             <li><a href="#events"><i class="fas fa-calendar-alt"></i> Sự kiện</a></li>
             <li><a href="#news"><i class="fas fa-newspaper"></i> Tin tức</a></li>
             <li><a href="#community"><i class="fas fa-users"></i> Cộng đồng</a></li>
@@ -115,7 +108,6 @@
                 <button class="modal-close" id="auth-modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Login Form -->
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
                         <label>Tên tài khoản</label>
@@ -128,7 +120,6 @@
                     <button class="btn btn-primary btn-block" type="submit">🔑 ĐĂNG NHẬP</button>
                 </form>
 
-                <!-- Register Form -->
                 <form id="registerForm" onsubmit="handleRegister(event)" style="display:none;">
                     <div class="form-group">
                         <label>Tên tài khoản mới</label>
@@ -206,7 +197,7 @@
                     </div>
                 </div>
                 <div class="about-image">
-                    <img src="logo.png" alt="Vương Quốc Gold" />
+                    <img src="assets/images/logo.png" alt="Vương Quốc Gold" />
                 </div>
             </div>
         </div>
@@ -225,14 +216,27 @@
         </div>
     </section>
 
-    <!-- ============ BXH ============ -->
-    <section class="section leaderboard" id="leaderboard">
+    <!-- ============ TOP NẠP TIỀN ============ -->
+    <section class="section top-recharge" id="top-recharge">
         <div class="container">
             <div class="section-header">
-                <h2><i class="fas fa-trophy" style="color: var(--accent-gold);"></i> BẢNG XẾP HẠNG</h2>
-                <a href="#" class="view-all">Xem BXH <i class="fas fa-arrow-right"></i></a>
+                <h2><i class="fas fa-coins" style="color: var(--accent-gold);"></i> TOP NẠP TIỀN</h2>
+                <a href="#" class="view-all">Xem tất cả <i class="fas fa-arrow-right"></i></a>
             </div>
-            <div class="leaderboard-grid" id="leaderboard-grid">
+            <div class="top-recharge-grid" id="top-recharge-grid">
+                <!-- JS sẽ render -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTV ============ -->
+    <section class="section ctv-section" id="ctv">
+        <div class="container">
+            <div class="section-header">
+                <h2><i class="fas fa-users" style="color: var(--accent-gold);"></i> CỘNG TÁC VIÊN</h2>
+                <a href="#" class="view-all">Xem CTV <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="ctv-grid" id="ctv-grid">
                 <!-- JS sẽ render -->
             </div>
         </div>
@@ -302,7 +306,8 @@
                         <li><a href="#">Trang chủ</a></li>
                         <li><a href="#about">Giới thiệu</a></li>
                         <li><a href="#servers">Máy chủ</a></li>
-                        <li><a href="#leaderboard">BXH</a></li>
+                        <li><a href="#top-recharge">Top Nạp</a></li>
+                        <li><a href="#ctv">CTV</a></li>
                         <li><a href="#events">Sự kiện</a></li>
                     </ul>
                 </div>
